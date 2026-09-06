@@ -1,0 +1,12 @@
+.env
+.DS_Store
+data/
+output/
+logs/
+__pycache__/
+.venv/
+.pytest_cache/
+
+# agent worktrees
+.claude/worktrees/
+.ruff_cache/

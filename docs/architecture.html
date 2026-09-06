@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>flat-scout — Architecture</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:        #f7f3ec;
+      --paper-2:      #efe8db;
+      --paper-3:      #e6dccb;
+      --card:         #fffdfa;
+      --ink:          #1c1a17;
+      --ink-2:        #33302b;
+      --muted:        #55504a;
+      --soft:         #8a847b;
+      --rule:         rgba(28,26,23,0.14);
+      --rule-solid:   #d6cab4;
+      --accent:       #c2410c;
+      --accent-deep:  #9a3412;
+      --accent-tint:  rgba(194,65,12,0.08);
+      --font-sans:  system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+      --font-mono:  ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      min-height: 100vh;
+      padding: 3.5rem 2rem 4rem;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--soft);
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 3.4vw + 1rem, 2.9rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+    .subtitle strong { font-weight: 600; color: var(--ink); }
+
+    section { margin-top: 4rem; }
+
+    h2 {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 0.6rem;
+    }
+
+    h3 {
+      font-family: var(--font-sans);
+      font-size: 0.98rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .lede {
+      font-size: 0.95rem;
+      line-height: 1.62;
+      color: var(--muted);
+      max-width: 68ch;
+      margin-bottom: 1.75rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      color: var(--ink-2);
+      background: var(--paper-2);
+      padding: 0.06em 0.3em;
+      border-radius: 4px;
+      font-variant-ligatures: none;
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      background: var(--card);
+      border: 1px solid var(--rule-solid);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      color: var(--ink-2);
+    }
+    pre code { background: transparent; padding: 0; font-size: inherit; }
+
+    .caption {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--soft);
+      max-width: 74ch;
+      margin-top: 1rem;
+      padding-left: 0.875rem;
+      border-left: 2px solid var(--rule-solid);
+    }
+
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .diagram { width: 100%; height: auto; display: block; }
+
+    .cards { display: grid; gap: 1rem; }
+    .cards.two   { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .cards.three { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--rule-solid);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem 1.2rem;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .card-header h3 { color: var(--ink); }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .card-dot.accent { background: var(--accent); }
+    .card-dot.ink    { background: var(--ink); }
+    .card-dot.muted  { background: var(--muted); }
+    .card-dot.soft   { background: var(--soft); }
+    .card ul { padding-left: 1.1rem; }
+    .card li { margin-bottom: 0.4rem; }
+    .card p + p { margin-top: 0.6rem; }
+
+    .rules { border-top: 1px solid var(--rule); }
+    .rule-row { padding: 1.2rem 0; border-bottom: 1px solid var(--rule); }
+    .rule-row h4 {
+      font-family: var(--font-sans);
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; align-items: baseline;
+    }
+    .rule-row h4 span {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--soft);
+      font-variant-ligatures: none;
+    }
+    .rule-row p { font-size: 0.88rem; line-height: 1.62; color: var(--muted); max-width: 78ch; }
+
+    table.plain {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      background: var(--card);
+      border: 1px solid var(--rule-solid);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table.plain th, table.plain td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    table.plain th {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--soft);
+      background: var(--paper-2);
+    }
+    table.plain tr:last-child td { border-bottom: none; }
+    table.plain td.num { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; }
+    table.plain td.unknown { color: var(--soft); font-style: italic; }
+    table.plain tfoot td { background: var(--accent-tint); color: var(--ink); font-weight: 500; }
+    .table-wrap { overflow-x: auto; }
+
+    dl.keys { display: grid; grid-template-columns: max-content 1fr; gap: 0.5rem 1.2rem; font-size: 0.86rem; line-height: 1.55; color: var(--muted); }
+    dl.keys dt { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink); white-space: nowrap; padding-top: 0.1rem; }
+    .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; align-items: start; }
+
+    .footer {
+      margin-top: 4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--rule);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--soft);
+      font-variant-ligatures: none;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 2rem 1rem 3rem; }
+      dl.keys { grid-template-columns: 1fr; }
+      dl.keys dt { padding-top: 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <p class="eyebrow">flat-scout · architecture</p>
+      <h1>Listings in, grades out</h1>
+      <p class="subtitle">One command takes a rental listing URL as far as a Verdict: the page is
+      downloaded, its EPC and floorplan are read, every Criterion in the brief grades the flat on its
+      own, and the grades are stored beside the sentence that explains each one. <strong>The
+      interesting part is not the scores.</strong> It is the machinery around them for finding out
+      whether a grader is doing any work at all, which is what a workshop on evaluating LLM systems
+      needs to see.</p>
+    </div>
+
+    <!-- ═══════════════════ 01 · THE PIPELINE ══════════════════════ -->
+    <section>
+<p class="eyebrow">01 — One command, one Listing</p>
+<h2>What <code>check &lt;url&gt;</code> does</h2>
+<p class="lede">Everything happens in one process against one SQLite file. The model is reached in
+exactly two places, both after the hard filters, so a Listing that was never going to qualify costs
+nothing. Every step that can fail records an event and leaves the row in a state the next run can
+pick up; nothing is silently dropped.</p>
+
+<div class="diagram-container">
+  <svg class="diagram" viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="p-title p-desc">
+    <title id="p-title">The check pipeline</title>
+    <desc id="p-desc">A listing URL is canonicalised and stored, filtered on its fields, downloaded, filtered again on the page, its images read by a vision model, graded one Criterion at a time, adjudicated into a score, coverage and verdict, and written to SQLite. A naive baseline sends the whole brief in one call instead of grading per Criterion.</desc>
+    <defs>
+      <marker id="p-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#55504a"/>
+      </marker>
+      <marker id="p-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#c2410c"/>
+      </marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f3ec"/>
+
+    <!-- ── Row 1 arrows ── -->
+    <line x1="104" y1="150" x2="136" y2="150" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <line x1="286" y1="150" x2="318" y2="150" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <line x1="468" y1="150" x2="500" y2="150" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <line x1="600" y1="150" x2="632" y2="150" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <line x1="782" y1="150" x2="814" y2="150" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <!-- filter 1 → prefiltered_out -->
+    <line x1="550" y1="190" x2="550" y2="228" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <rect x="556" y="200" width="30" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="560" y="209" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">FAIL</text>
+    <!-- fetch → fetch_failed / unavailable -->
+    <line x1="707" y1="180" x2="707" y2="228" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <rect x="713" y="196" width="66" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="717" y="205" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">4 ATTEMPTS</text>
+    <!-- filter 2 → prefiltered_out -->
+    <path d="M 864,190 V 210 Q 864,218 856,218 H 640 Q 632,218 632,226 V 240 H 625" fill="none" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <!-- filter 2 → row 2 -->
+    <path d="M 914,150 H 1000 Q 1008,150 1008,158 V 262 Q 1008,270 1000,270 H 120 Q 112,270 112,278 V 322 Q 112,330 120,330 H 136" fill="none" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <rect x="928" y="130" width="36" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="946" y="139" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PASS</text>
+
+    <!-- ── Row 2 arrows ── -->
+    <line x1="336" y1="360" x2="380" y2="360" stroke="#c2410c" stroke-width="1.2" marker-end="url(#p-arrow-accent)"/>
+    <rect x="340" y="340" width="36" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="358" y="349" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">FACTS</text>
+    <line x1="600" y1="360" x2="644" y2="360" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <rect x="602" y="340" width="40" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="622" y="349" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">GRADES</text>
+    <line x1="824" y1="360" x2="880" y2="360" stroke="#55504a" stroke-width="1.2" marker-end="url(#p-arrow)"/>
+    <rect x="826" y="340" width="52" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="852" y="349" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">VERDICT</text>
+    <!-- naive branch -->
+    <path d="M 236,390 V 462 Q 236,470 244,470 H 380" fill="none" stroke="#c2410c" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#p-arrow-accent)"/>
+    <rect x="244" y="424" width="122" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="248" y="433" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">weighted_criteria=false</text>
+    <path d="M 600,470 H 952 Q 960,470 960,462 V 404" fill="none" stroke="#c2410c" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#p-arrow-accent)"/>
+    <rect x="740" y="450" width="112" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="796" y="459" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">ONE SCORE, NO GRADES</text>
+
+    <!-- ── Row 1 nodes ── -->
+    <rect x="24" y="126" width="80" height="48" rx="20" fill="rgba(85,80,74,0.10)" stroke="#8a847b" stroke-width="1"/>
+    <text x="64" y="148" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">URL</text>
+    <text x="64" y="163" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">pasted by hand</text>
+
+    <rect x="136" y="120" width="150" height="60" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="211" y="146" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Canonicalise</text>
+    <text x="211" y="162" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">urls.py · portal, id</text>
+
+    <rect x="318" y="120" width="150" height="60" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="393" y="146" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Upsert the row</text>
+    <text x="393" y="162" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">keyed on (portal, id)</text>
+
+    <polygon points="550,110 600,150 550,190 500,150" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="550" y="147" fill="#1c1a17" font-size="11" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">hard filter</text>
+    <text x="550" y="161" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">on the fields</text>
+
+    <rect x="632" y="120" width="150" height="60" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="707" y="146" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Fetch the page</text>
+    <text x="707" y="162" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">fetch.py · paced, retried</text>
+
+    <polygon points="864,110 914,150 864,190 814,150" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="864" y="147" fill="#1c1a17" font-size="11" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">hard filter</text>
+    <text x="864" y="161" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">on the page</text>
+
+    <!-- terminals under row 1 -->
+    <rect x="475" y="228" width="150" height="24" rx="6" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <text x="550" y="244" fill="#1c1a17" font-size="10" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">prefiltered_out</text>
+    <rect x="632" y="228" width="150" height="24" rx="6" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <text x="707" y="244" fill="#1c1a17" font-size="10" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">fetch_failed · unavailable</text>
+
+    <!-- ── Row 2 nodes ── -->
+    <rect x="136" y="330" width="200" height="60" rx="6" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="236" y="356" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Read the images</text>
+    <text x="236" y="372" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">vision.py · 1 read + 2 compass calls</text>
+
+    <rect x="380" y="330" width="220" height="60" rx="6" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="490" y="356" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Grade every Criterion</text>
+    <text x="490" y="372" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">grading.py · code first, model if asked</text>
+
+    <rect x="644" y="330" width="180" height="60" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="734" y="356" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Adjudicate</text>
+    <text x="734" y="372" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">adjudicate.py · arithmetic only</text>
+
+    <!-- SQLite cylinder -->
+    <path d="M 880,332 A 80,10 0 0 1 1040,332 V 392 A 80,10 0 0 1 880,392 Z" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <ellipse cx="960" cy="332" rx="80" ry="10" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="960" y="358" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">data/flats.db</text>
+    <text x="960" y="373" fill="#55504a" font-size="8.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">listings · criterion_grades · events</text>
+
+    <!-- naive baseline box -->
+    <rect x="380" y="440" width="220" height="60" rx="6" fill="#fffdfa" stroke="#c2410c" stroke-width="1" stroke-dasharray="5,4"/>
+    <text x="490" y="466" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Naive baseline</text>
+    <text x="490" y="482" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">evaluate.py · criteria.md in one call</text>
+
+    <!-- callouts -->
+    <text x="1248" y="80" fill="#9a3412" font-size="14" font-style="italic" font-family="Georgia, serif" text-anchor="end">the filters fire twice: on the fields, then on the page</text>
+    <path d="M 1100 92 Q 980 96 900 118" fill="none" stroke="rgba(194,65,12,0.5)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="896" cy="120" r="2" fill="#9a3412"/>
+
+    <text x="1248" y="300" fill="#1c1a17" font-size="14" font-style="italic" font-family="Georgia, serif" text-anchor="end">a stored image reading is reused; nothing is read twice</text>
+    <path d="M 1130 306 Q 1090 318 1044 328" fill="none" stroke="rgba(28,26,23,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="1040" cy="330" r="2" fill="#1c1a17"/>
+
+    <!-- legend -->
+    <line x1="32" y1="520" x2="1248" y2="520" stroke="rgba(28,26,23,0.10)" stroke-width="0.8"/>
+    <text x="32" y="544" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="120" y="534" width="14" height="12" rx="3" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="142" y="544" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">CODE</text>
+    <rect x="220" y="534" width="14" height="12" rx="3" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="242" y="544" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">CALLS A MODEL</text>
+    <rect x="380" y="534" width="14" height="12" rx="3" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <text x="402" y="544" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">TERMINAL STATUS</text>
+    <line x1="560" y1="540" x2="600" y2="540" stroke="#c2410c" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <text x="610" y="544" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">THE OTHER EVALUATOR</text>
+  </svg>
+</div>
+
+<p class="caption">The image reading is stored on the row with a timestamp, so a retry after a model
+outage, a <code>grade --backfill</code> and a <code>grade --measure</code> all reuse it and pay for
+no vision call. A retry also never downloads the page again: the fetched fields are already on the
+row. Only the evaluation is repeated. Before the images are read they are cached once under
+<code>data/images/&lt;portal&gt;_&lt;id&gt;/</code>, with the path stored beside the URL, and the readers
+prefer the local file: after <code>check</code> nothing depends on the Portal&#8217;s media host.</p>
+    </section>
+
+    <!-- ═══════════════════ 02 · TWO EVALUATORS ════════════════════ -->
+    <section>
+<p class="eyebrow">02 — Two evaluators, one switch</p>
+<h2>One score you cannot argue with, or ten grades you can</h2>
+<p class="lede">Both evaluators read the same Listing and the same image reading. They differ in
+what the model is asked, how many times, and what you can learn when the answer is wrong.
+<code>weighted_criteria</code> in <code>config.toml</code> chooses.</p>
+
+<div class="table-wrap">
+<table class="plain">
+  <thead>
+    <tr><th></th><th>Naive baseline</th><th>Weighted Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Where the brief lives</td>
+      <td><code>criteria/criteria.md</code>, one document</td>
+      <td><code>criteria/*.md</code>, one file per Criterion, with a weight and a rubric</td>
+    </tr>
+    <tr>
+      <td>What the model is sent</td>
+      <td>The whole brief, the Listing, the image reading</td>
+      <td>A shared preamble (<code>_brief.md</code>, <code>_fields.md</code>), the Listing, and <em>one</em> Criterion's rubric</td>
+    </tr>
+    <tr>
+      <td>Model calls per Listing</td>
+      <td class="num">1</td>
+      <td class="num">one per model-graded Criterion; zero for a Criterion a field answers</td>
+    </tr>
+    <tr>
+      <td>What comes back</td>
+      <td>A verdict, one score from 0 to 10, three reasons, red flags, questions</td>
+      <td>Per Criterion: a grade or <code>null</code>, one sentence of evidence, an optional concern and question</td>
+    </tr>
+    <tr>
+      <td>When a flat scores wrongly</td>
+      <td>You can see that it did. Not why: one number has no parts</td>
+      <td>You can see which Criterion did it, what it read the grade off, and whether the rubric or the weight is at fault</td>
+    </tr>
+    <tr>
+      <td>Cost of changing a weight</td>
+      <td>One model call per Listing, because the weight is prose inside the brief</td>
+      <td>Nothing. Grades are stored; <code>report --weights</code> replays them</td>
+    </tr>
+    <tr>
+      <td>Cost of changing a rubric</td>
+      <td>One model call per Listing</td>
+      <td>One model call per Listing <em>for that Criterion</em>; the others are untouched</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p class="caption">The two paths score on different scales, so <code>hopeful_threshold</code> means
+something different under each. Switch the flag and set the threshold from a fresh
+<code>report</code> histogram; a threshold carried across is a number about the other evaluator.</p>
+    </section>
+
+    <!-- ═══════════════════ 03 · A CRITERION ═══════════════════════ -->
+    <section>
+<p class="eyebrow">03 — The unit of the brief</p>
+<h2>A Criterion is one file, and the file is the prompt</h2>
+<p class="lede">Front matter says how the Criterion is graded and how much it counts. The body is
+the rubric. For a model-graded Criterion the body is sent verbatim on every call, so every sentence
+in it is prompt weight: a note about the rubric's history belongs in the README, never here.</p>
+
+<div class="two-col">
+<pre><code>---
+name: A tenancy that accepts a dog
+description: Silence means unknown. A stated no-pets policy is a dealbreaker.
+weight: 3
+veto_at_or_below: 0
+grade:
+  model: true
+unknown: skip
+silence_prior: {0: 0.7, 10: 0.3}
+ask: "What is the building's pet policy?"
+---
+
+## What this measures
+Whether the tenancy will permit a dog.
+
+## Rubric
+**10** — an explicit pet-friendly policy at no extra cost.
+**8** — pets stated as considered, or permitted on application.
+**5** — pets mentioned with conditions or an added deposit.
+**0** — a stated no-pets policy. This rejects the listing outright.
+
+## Evidence, and what not to read into it
+Very few listings say anything, and silence means unknown,
+not no. Never reject on silence: return null.</code></pre>
+
+<dl class="keys">
+  <dt>grade</dt>
+  <dd>Exactly one of four forms. <code>field</code> + <code>map</code> looks a closed-set field up
+  (an EPC band, a layout verdict); <code>field</code> + <code>bands</code> reads a number off
+  thresholds; <code>grader</code> names a Python function for anything needing more than one field;
+  <code>model: true</code> asks a model. The loader refuses a map that omits a value the field can
+  take.</dd>
+  <dt>fallback: model</dt>
+  <dd>Try the field first; ask the model only when the field is absent. A floor area from the EPC
+  certificate settles the size Criterion without a call; a Listing with no certificate goes to the
+  model.</dd>
+  <dt>unknown</dt>
+  <dd><code>skip</code> leaves an unanswered Criterion out of the Coverage and lets the scorer
+  price it. A number supplies a default value instead: it moves the Score, never the Coverage, and
+  can never fire a veto.</dd>
+  <dt>veto_at_or_below</dt>
+  <dd>A determined grade at or under this rejects the Listing outright. Only a fact can veto, which
+  is why every Criterion carrying one also says <code>unknown: skip</code>.</dd>
+  <dt>silence_prior</dt>
+  <dd>What an advert's silence suggests, as odds over grades. Used only where a model read the
+  advert and found nothing; a field nobody extracted is not silence.</dd>
+  <dt>ask</dt>
+  <dd>The question to put to the agent when this Criterion comes back unknown. A determined
+  Criterion proposes nothing.</dd>
+  <dt>weight</dt>
+  <dd>How much the Criterion counts. Above zero, or the loader refuses it: a zero-weight Criterion
+  still costs a call and still reads as active.</dd>
+</dl>
+</div>
+
+<div class="cards two" style="margin-top:1.5rem">
+  <div class="card">
+    <div class="card-header"><span class="card-dot accent"></span><h3>What the rubric hash covers</h3></div>
+    <p>Every stored grade carries a fingerprint of the <code>grade</code> block, the
+    <code>fallback</code> and the body. <code>grade --backfill</code> re-grades a Criterion only
+    when the fingerprint on disk differs from the one stored. Deliberately <em>not</em> hashed:
+    <code>weight</code>, <code>unknown</code>, <code>veto_at_or_below</code>, <code>ask</code>.
+    Those are applied when a grade is read, so editing any of them leaves every stored grade valid
+    and costs no model call. That is the whole of the tunability.</p>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-dot muted"></span><h3>What no hash covers</h3></div>
+    <p>Two things change what a grade would be without moving any fingerprint: the Python in
+    <code>graders.py</code> and the shared preamble in <code>_brief.md</code> and
+    <code>_fields.md</code>. After editing one of those, <code>grade --backfill</code> reports
+    nothing stale while newly graded Listings quietly use the new text. The escape hatch is
+    explicit: <code>grade --backfill --force</code>, scoped with <code>--criterion</code>.</p>
+  </div>
+</div>
+    </section>
+
+    <!-- ═══════════════════ 04 · ADJUDICATION ══════════════════════ -->
+    <section>
+<p class="eyebrow">04 — From grades to a Verdict</p>
+<h2>Silence is priced, never ignored</h2>
+<p class="lede">The Score is a weighted mean over the <em>whole</em> brief. A Criterion that came
+back unknown enters at <code>unknown_prior</code> (4 of 10) rather than being left out, because a
+mean over the answered Criteria only rewarded an advert for saying less: the flat that answered
+least scored highest. Coverage says how much of the brief could be read at all, and it moves the
+Score continuously rather than only gating it.</p>
+
+<div class="table-wrap">
+<table class="plain">
+  <thead>
+    <tr><th>Criterion</th><th>Weight</th><th>Grade</th><th>Determined</th><th>Counts as</th><th>Weight × value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>A tenancy that accepts a dog</td><td class="num">3</td><td class="num">8</td><td class="num">yes</td><td class="num">8</td><td class="num">24</td></tr>
+    <tr><td>At least 50 m²</td><td class="num">4</td><td class="num">10</td><td class="num">yes</td><td class="num">10</td><td class="num">40</td></tr>
+    <tr><td>An aspect other than west</td><td class="num">2</td><td class="unknown">unknown</td><td class="num">no</td><td class="num">4 (prior)</td><td class="num">8</td></tr>
+    <tr><td>Hard floors through the living areas</td><td class="num">1</td><td class="unknown">unknown</td><td class="num">no</td><td class="num">4 (prior)</td><td class="num">4</td></tr>
+    <tr><td>A lift above the second floor</td><td class="num">1</td><td class="num">10</td><td class="num">yes</td><td class="num">10</td><td class="num">10</td></tr>
+  </tbody>
+  <tfoot>
+    <tr><td>Score = 86 ÷ 11 = <strong>7.82</strong></td><td class="num">11</td><td></td><td></td><td>Coverage = (3 + 4 + 1) ÷ 11 = <strong>73%</strong></td><td class="num">86</td></tr>
+  </tfoot>
+</table>
+</div>
+
+<p class="caption">The weights are the ones shipped in <code>criteria/</code>. Then the Verdict, in this order: <strong>reject</strong> if
+any Criterion with a veto is determined at or under its line; <strong>hopeful</strong> if the Score
+reaches <code>hopeful_threshold</code> and the Coverage reaches <code>coverage_floor</code>;
+<strong>borderline</strong> otherwise. The reasons are the three highest-weighted grades above 5,
+the red flags are the vetoes, the coverage warning, every concern a grader raised, and the lowest
+grades below 5. A Listing where nothing at all was read has no Score rather than a Score made of
+prior: that would be a number about the brief, not the flat.</p>
+    </section>
+
+    <!-- ═══════════════════ 05 · STATUS MACHINE ════════════════════ -->
+    <section>
+<p class="eyebrow">05 — The status machine</p>
+<h2>Every path ends somewhere</h2>
+<p class="lede">A row's <code>status</code> is the only thing the pipeline branches on. A Listing
+the Portal has withdrawn goes to a terminal state rather than a retry queue, because retrying
+cannot help. A download that fails four times stops. And a decision, once recorded with
+<code>approve</code> or <code>reject</code>, is final: a second one is logged and ignored.</p>
+
+<div class="diagram-container">
+  <svg class="diagram" viewBox="0 0 1280 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="s-title s-desc">
+    <title id="s-title">Listing status machine</title>
+    <desc id="s-desc">A listing moves from new to fetch_pending to evaluated, with terminal branches to prefiltered_out, unavailable and fetch_failed, and two human decisions out of evaluated: approved and rejected.</desc>
+    <defs>
+      <marker id="s-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#55504a"/>
+      </marker>
+      <marker id="s-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#c2410c"/>
+      </marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f3ec"/>
+
+    <!-- transitions -->
+    <line x1="64" y1="200" x2="96" y2="200" stroke="#55504a" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+    <line x1="272" y1="200" x2="384" y2="200" stroke="#55504a" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+    <rect x="296" y="180" width="64" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="328" y="189" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PAGE READ</text>
+
+    <!-- fetch_pending → fetch_failed (up-right) -->
+    <path d="M 232,164 V 84 Q 232,76 240,76 H 384" fill="none" stroke="#55504a" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+    <rect x="272" y="56" width="72" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="308" y="65" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">4 ATTEMPTS</text>
+
+    <!-- fetch_pending → prefiltered_out (down) -->
+    <line x1="184" y1="236" x2="184" y2="300" stroke="#55504a" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+    <rect x="100" y="256" width="80" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="104" y="265" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">HARD FILTER</text>
+
+    <!-- fetch_pending → unavailable (down-right) -->
+    <path d="M 232,236 V 260 Q 232,268 240,268 H 464 Q 472,268 472,276 V 300" fill="none" stroke="#55504a" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+    <rect x="300" y="248" width="72" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="336" y="257" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">LET AGREED</text>
+
+    <!-- evaluated → approved -->
+    <path d="M 560,184 H 640 Q 648,184 648,176 V 104 Q 648,96 656,96 H 704" fill="none" stroke="#c2410c" stroke-width="1.2" marker-end="url(#s-arrow-accent)"/>
+    <rect x="600" y="118" width="56" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="628" y="127" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">APPROVE</text>
+
+    <!-- evaluated → rejected -->
+    <path d="M 560,216 H 640 Q 648,216 648,224 V 296 Q 648,304 656,304 H 704" fill="none" stroke="#c2410c" stroke-width="1.2" marker-end="url(#s-arrow-accent)"/>
+    <rect x="604" y="270" width="48" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="628" y="279" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">REJECT</text>
+
+    <!-- start -->
+    <circle cx="52" cy="200" r="6" fill="#1c1a17"/>
+    <text x="52" y="180" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">new</text>
+
+    <!-- states -->
+    <rect x="96" y="164" width="176" height="72" rx="8" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="184" y="204" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">fetch_pending</text>
+    <text x="184" y="220" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">retried, paced</text>
+
+    <rect x="384" y="164" width="176" height="72" rx="8" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="472" y="204" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">evaluated</text>
+    <text x="472" y="220" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">grades, score, verdict</text>
+
+    <rect x="384" y="40" width="176" height="72" rx="8" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <rect x="392" y="46" width="28" height="12" rx="2" fill="transparent" stroke="rgba(85,80,74,0.45)" stroke-width="0.8"/>
+    <text x="406" y="55" fill="#55504a" font-size="7" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">END</text>
+    <text x="472" y="80" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">fetch_failed</text>
+    <text x="472" y="96" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">or a bot challenge</text>
+
+    <rect x="96" y="300" width="176" height="72" rx="8" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <rect x="104" y="306" width="28" height="12" rx="2" fill="transparent" stroke="rgba(85,80,74,0.45)" stroke-width="0.8"/>
+    <text x="118" y="315" fill="#55504a" font-size="7" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">END</text>
+    <text x="184" y="340" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">prefiltered_out</text>
+    <text x="184" y="356" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">never graded</text>
+
+    <rect x="384" y="300" width="176" height="72" rx="8" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <rect x="392" y="306" width="28" height="12" rx="2" fill="transparent" stroke="rgba(85,80,74,0.45)" stroke-width="0.8"/>
+    <text x="406" y="315" fill="#55504a" font-size="7" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">END</text>
+    <text x="472" y="340" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">unavailable</text>
+    <text x="472" y="356" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">a retry cannot help</text>
+
+    <rect x="704" y="60" width="176" height="72" rx="8" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <rect x="712" y="66" width="28" height="12" rx="2" fill="transparent" stroke="rgba(85,80,74,0.45)" stroke-width="0.8"/>
+    <text x="726" y="75" fill="#55504a" font-size="7" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">END</text>
+    <text x="792" y="100" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">approved</text>
+    <text x="792" y="116" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">a human said yes</text>
+
+    <rect x="704" y="268" width="176" height="72" rx="8" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <rect x="712" y="274" width="28" height="12" rx="2" fill="transparent" stroke="rgba(85,80,74,0.45)" stroke-width="0.8"/>
+    <text x="726" y="283" fill="#55504a" font-size="7" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">END</text>
+    <text x="792" y="308" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">rejected</text>
+    <text x="792" y="324" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">kept, with its grades</text>
+
+    <!-- callouts -->
+    <text x="1248" y="200" fill="#9a3412" font-size="14" font-style="italic" font-family="Georgia, serif" text-anchor="end">your yes and no are the labels every report is held against</text>
+    <path d="M 1000 210 Q 940 220 900 230" fill="none" stroke="rgba(194,65,12,0.5)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="884" cy="234" r="2" fill="#9a3412"/>
+
+    <!-- legend -->
+    <line x1="32" y1="400" x2="1248" y2="400" stroke="rgba(28,26,23,0.10)" stroke-width="0.8"/>
+    <text x="32" y="424" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+    <circle cx="134" cy="420" r="5" fill="#1c1a17"/>
+    <text x="150" y="424" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">START</text>
+    <rect x="240" y="414" width="14" height="12" rx="3" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="262" y="424" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">IN FLIGHT</text>
+    <rect x="384" y="414" width="14" height="12" rx="3" fill="rgba(28,26,23,0.05)" stroke="#55504a" stroke-width="1"/>
+    <text x="406" y="424" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">TERMINAL — TAGGED END</text>
+    <rect x="656" y="414" width="14" height="12" rx="3" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="678" y="424" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">WHERE THE REPORTS READ FROM</text>
+  </svg>
+</div>
+
+<p class="caption">An <code>evaluated</code> Listing is never evaluated twice. Every replay
+(<code>grade --backfill</code>, <code>rescore</code>, <code>report --weights</code>) writes to
+<code>criterion_grades</code> or to nothing at all; the Score and Verdict stored at evaluation time
+stay as they were, because they are the record your decision was taken against.</p>
+    </section>
+
+    <!-- ═══════════════════ 06 · READING THE IMAGES ════════════════ -->
+    <section>
+<p class="eyebrow">06 — Reading the images</p>
+<h2>Perception is the model&#8217;s job. Measurement is not.</h2>
+<p class="lede">Three things in the brief exist only inside pictures: the EPC band, whether the
+reception is a real room, and which way the windows face. The last one is where this pipeline earns
+its complexity. Asked for the aspect directly, a model reads the compass correctly and then rotates
+the plan wrongly, a confident wrong answer nobody can check without opening the floorplan. So the
+model is asked only for the one thing it does better than any measurement: <em>where on the page the
+compass is</em>. Everything after that is arithmetic in <code>compass.py</code>.</p>
+
+<div class="diagram-container">
+  <svg class="diagram" viewBox="0 0 1280 860" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="v-title v-desc">
+    <title id="v-title">The image-reading path</title>
+    <desc id="v-desc">EPC images and floorplans are downloaded, PDFs rasterised, then read by a vision model; answers about images that were never sent are erased, the compass is read twice and independently measured from pixels, and the window aspect is kept only when the two agree within 45 degrees.</desc>
+    <defs>
+      <marker id="v-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#55504a"/>
+      </marker>
+      <marker id="v-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#c2410c"/>
+      </marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f3ec"/>
+
+    <line x1="480" y1="96" x2="480" y2="132" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <line x1="568" y1="176" x2="848" y2="176" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="692" y="156" width="32" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="708" y="165" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PDF</text>
+    <line x1="480" y1="220" x2="480" y2="272" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="490" y="240" width="48" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="494" y="249" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">GRAPH</text>
+    <path d="M 960,208 V 232 Q 960,240 952,240 H 616 Q 608,240 608,248 V 284 Q 608,292 600,292 H 592" fill="none" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="748" y="220" width="72" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="784" y="229" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PAGE 1 PNG</text>
+    <line x1="480" y1="344" x2="480" y2="392" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="490" y="358" width="76" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="494" y="367" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">RAW ANSWER</text>
+    <line x1="480" y1="456" x2="480" y2="504" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="490" y="470" width="40" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="494" y="479" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">KEPT</text>
+    <line x1="592" y1="536" x2="848" y2="536" stroke="#c2410c" stroke-width="1.2" marker-end="url(#v-arrow-accent)"/>
+    <rect x="680" y="516" width="80" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="720" y="525" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">COMPASS BOX</text>
+    <line x1="480" y1="568" x2="480" y2="604" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="392" y="576" width="72" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="396" y="585" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">MODEL, ×2</text>
+    <path d="M 960,568 V 640 Q 960,648 952,648 H 576" fill="none" stroke="#c2410c" stroke-width="1.2" marker-end="url(#v-arrow-accent)"/>
+    <rect x="738" y="628" width="52" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="764" y="637" fill="#c2410c" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PIXELS</text>
+    <line x1="480" y1="692" x2="480" y2="728" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="490" y="700" width="48" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="494" y="709" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">AGREE</text>
+    <line x1="384" y1="648" x2="248" y2="648" stroke="#55504a" stroke-width="1.2" marker-end="url(#v-arrow)"/>
+    <rect x="286" y="628" width="60" height="12" rx="2" fill="#f7f3ec"/>
+    <text x="316" y="637" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">DISAGREE</text>
+    <circle cx="232" cy="648" r="8" fill="none" stroke="#55504a" stroke-width="1"/>
+    <circle cx="232" cy="648" r="5" fill="#55504a"/>
+    <text x="232" y="684" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">aspect null</text>
+
+    <rect x="368" y="48" width="224" height="48" rx="20" fill="rgba(85,80,74,0.10)" stroke="#8a847b" stroke-width="1"/>
+    <text x="480" y="70" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">EPC image + floorplan</text>
+    <text x="480" y="85" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">from data/images, else downloaded</text>
+
+    <polygon points="480,132 568,176 480,220 392,176" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="480" y="180" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">certificate?</text>
+
+    <rect x="848" y="144" width="224" height="64" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="960" y="176" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Rasterise page 1</text>
+    <text x="960" y="192" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">pypdfium2 · about a fifth are PDFs</text>
+
+    <rect x="368" y="272" width="224" height="72" rx="6" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="480" y="304" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Vision read</text>
+    <text x="480" y="320" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">band · area · layout · windows</text>
+
+    <rect x="368" y="392" width="224" height="64" rx="6" fill="rgba(194,65,12,0.05)" stroke="rgba(194,65,12,0.50)" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="480" y="420" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Erase what wasn&#8217;t sent</text>
+    <text x="480" y="436" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">_only_what_was_seen</text>
+
+    <rect x="368" y="504" width="224" height="64" rx="6" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="480" y="532" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Read the compass, twice</text>
+    <text x="480" y="548" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">its own call · plan enlarged</text>
+
+    <rect x="848" y="504" width="224" height="64" rx="6" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="960" y="532" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Measure north</text>
+    <text x="960" y="548" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">compass.py · no model</text>
+
+    <polygon points="480,604 576,648 480,692 384,648" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="480" y="645" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">within 45°?</text>
+    <text x="480" y="660" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">two methods</text>
+
+    <rect x="368" y="728" width="224" height="48" rx="20" fill="rgba(85,80,74,0.10)" stroke="#8a847b" stroke-width="1"/>
+    <text x="480" y="750" fill="#1c1a17" font-size="12" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Into every grader&#8217;s prompt</text>
+    <text x="480" y="765" fill="#55504a" font-size="9" font-family="ui-monospace, Menlo, monospace" text-anchor="middle">unknowns omitted, never sent as null</text>
+
+    <text x="1248" y="332" fill="#9a3412" font-size="14" font-style="italic" font-family="Georgia, serif" text-anchor="end">the model finds the compass; arithmetic reads it</text>
+    <path d="M 1140 344 Q 1112 432 1076 496" fill="none" stroke="rgba(194,65,12,0.50)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="1072" cy="504" r="2" fill="#9a3412"/>
+
+    <text x="32" y="440" fill="#1c1a17" font-size="14" font-style="italic" font-family="Georgia, serif">a wrong aspect looks exactly like a right one</text>
+    <path d="M 176 452 Q 248 540 376 640" fill="none" stroke="rgba(28,26,23,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="384" cy="648" r="2" fill="#1c1a17"/>
+
+    <line x1="32" y1="800" x2="1248" y2="800" stroke="rgba(28,26,23,0.10)" stroke-width="0.8"/>
+    <text x="32" y="824" fill="#8a847b" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="128" y="814" width="16" height="12" rx="6" fill="rgba(85,80,74,0.10)" stroke="#8a847b" stroke-width="1"/>
+    <text x="152" y="824" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">START / END</text>
+    <rect x="288" y="814" width="14" height="12" rx="3" fill="rgba(194,65,12,0.08)" stroke="#c2410c" stroke-width="1"/>
+    <text x="310" y="824" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">CALLS A MODEL</text>
+    <polygon points="464,812 480,820 464,828 448,820" fill="#fffdfa" stroke="#1c1a17" stroke-width="1"/>
+    <text x="490" y="824" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">DECISION</text>
+    <rect x="600" y="814" width="14" height="12" rx="3" fill="rgba(194,65,12,0.05)" stroke="rgba(194,65,12,0.50)" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="622" y="824" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">GUARD THAT DOESN&#8217;T TRUST THE MODEL</text>
+    <line x1="960" y1="820" x2="996" y2="820" stroke="#c2410c" stroke-width="1.2" marker-end="url(#v-arrow-accent)"/>
+    <text x="1006" y="824" fill="#55504a" font-size="8" font-family="ui-monospace, Menlo, monospace" letter-spacing="0.06em">MEASURED, NOT READ</text>
+  </svg>
+</div>
+
+<p class="caption">The two estimates of north have nothing in common, which is the point: a model
+assumes north is up on a compass it cannot see, while a measurement taken from a badly placed box
+confidently measures the wrong symbol. Requiring agreement is a far stronger guarantee than running
+either one twice, and it costs nothing extra, because the model has to locate the window walls
+anyway. On disagreement the aspect is null and the Criterion comes back unknown, which is the honest
+answer.</p>
+    </section>
+
+    <!-- ═══════════════════ 07 · TESTING A GRADER ══════════════════ -->
+    <section>
+<p class="eyebrow">07 — Knowing whether a grader works</p>
+<h2>Three questions a rubric can be asked, and the command for each</h2>
+<p class="lede">A histogram of scores says how many Listings clear a line, never whether the ones
+above it are the ones a person would have wanted. No machine can say a rubric is <em>right</em>. It
+can say three narrower things, and each has its own tool.</p>
+
+<div class="cards three">
+  <div class="card">
+    <div class="card-header"><span class="card-dot accent"></span><h3>Against ground truth</h3></div>
+    <p><code>annotate</code> serves a local page where a person writes down, for each floorplan in
+    <code>tests/fixtures/floorplans/</code>, where the north indicator points and which walls the
+    windows are on. Answers are in <em>image</em> terms, so the annotator does no arithmetic and the
+    two pipeline stages can be scored apart.</p>
+    <p><code>benchmark</code> runs the reader over every annotated plan and scores north, the window
+    walls and the final aspects separately, each as <em>right</em>, <em>wrong</em>, <em>abstained</em>
+    or <em>correctly silent</em>. Abstention is its own outcome: a plan with no compass drawn is
+    answered correctly by saying nothing, and a pipeline that invents a bearing there is the failure
+    the corpus exists to catch.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-dot ink"></span><h3>Against itself</h3></div>
+    <p><code>grade --measure</code> grades every model-reachable Criterion several times over the
+    same Listings and reports two numbers per Criterion: how often it returned unknown, and the
+    widest spread between its own answers on one flat.</p>
+    <p>A Criterion unknown on nine flats in ten is asking for something adverts never say. One that
+    answers 2, 6 and 9 on the same flat has no anchors the model can find, and its weight is buying
+    noise. Neither says the rubric is correct; both say whether it is doing any work.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-dot muted"></span><h3>Against your decisions</h3></div>
+    <p>Record your own yes or no with <code>approve</code> and <code>reject</code>. Then
+    <code>report --weights</code> prints, per Criterion, its mean grade among the Listings you
+    approved against the ones you rejected. A Criterion whose separation is <em>negative</em> graded
+    well exactly the flats you turned down: no weight rescues that, the rubric is what needs
+    rewriting, and the report names the file.</p>
+    <p>The same command replays any candidate weighting over the stored grades with no model call,
+    and says what it would have done to the flats already decided.</p>
+  </div>
+</div>
+
+<div class="cards two" style="margin-top:1rem">
+  <div class="card">
+    <div class="card-header"><span class="card-dot soft"></span><h3>Retiring a Criterion is an experiment, not a deletion</h3></div>
+    <p>Move the file into <code>criteria/retired/</code>. The loader reads <code>criteria/*.md</code>
+    and does not recurse, so the Criterion stops counting at once, and its stored grades stay in the
+    database untouched. Move it back and they are still valid, as long as the rubric was not edited
+    while it was out: the hash decides, not the location.</p>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-dot soft"></span><h3>What the hard filters hid</h3></div>
+    <p><code>report --suppressed</code> lists the Listings that were seen and never graded, counted
+    by which filter fired. The count is the finding: a price cap accounting for nearly every row is a
+    cap set below the market, and no amount of reading the individual rows will show it.</p>
+  </div>
+</div>
+    </section>
+
+    <!-- ═══════════════════ 08 · PRINCIPLES ════════════════════════ -->
+    <section>
+<p class="eyebrow">08 — Invariants</p>
+<h2>What isn&#8217;t written down as a rule but is in every module</h2>
+<p class="lede">Between them these explain most of what looks like over-engineering in a small
+tool. Each was learned from a wrong answer that nobody downstream could have caught.</p>
+
+<div class="rules">
+  <div class="rule-row">
+    <h4>Measurement, not model<span>compass.py · aspect_from_bearings · render_reading</span></h4>
+    <p>Wherever an answer can be computed, it is, and the model is never asked for it. The window
+    aspect is derived from two bearings rather than requested; <code>epc_band_source</code> is set
+    from the image that was actually sent; square metres become square feet in code. Perception is
+    the model&#8217;s job. Arithmetic is not, and handing it over produces confident wrong answers of
+    precisely the kind nobody downstream can catch.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>Guarantees that don&#8217;t depend on compliance<span>_only_what_was_seen · the loader</span></h4>
+    <p>The prompt asks for a null band when the image is doubtful; <code>_only_what_was_seen</code>
+    then erases any answer about an image that was never sent, whatever the prompt asked for. The
+    loader refuses a <code>map</code> that omits a value the field can take, a zero weight, and a
+    <code>silence_prior</code> on a Criterion no model reaches. A prompt is a request. A filter is a
+    constraint.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>Null beats a guess<span>bedroom_has_window · floor_text · pin quality</span></h4>
+    <p>Every field a vision model fills may be unknown, and unknown is the answer whenever the image
+    is absent, unreadable or ambiguous. <code>bedroom_has_window</code> is <code>False</code> only
+    for a plan that positively shows an internal bedroom. The floor printed on a plan is kept only
+    when two independent reads agree word for word, after one read invented &#8220;Ground
+    Floor&#8221; on a drawing that contains neither word. A portal pin that is not
+    <code>ACCURATE_POINT</code> leaves the coordinates empty rather than placing the flat somewhere
+    it is not.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>Silence is priced, not ignored<span>unknown_prior · silence_prior · determined</span></h4>
+    <p>&#8220;Absent means unknown, never bad&#8221; is the <code>determined</code> flag: an unread
+    Criterion never fires a veto and never counts toward Coverage. But it is not dropped from the
+    Score either, because a mean over the answered Criteria alone rewards an advert for saying less.
+    It enters at a prior slightly below the middle, on the claim that an advert omits what does not
+    flatter the flat.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>One Criterion per call<span>grade_one · grade_listing · CachePoint</span></h4>
+    <p>Isolation is the design: a Criterion knows nothing about the others, so a grade that is wrong
+    is attributable to one rubric. The calls are independent by construction, which is what lets them
+    run concurrently. One goes first alone, deliberately: the shared preamble and the Listing are
+    marked cacheable, and the provider&#8217;s cache entry does not exist until the first response
+    begins. Fanning all of them out at once turns every call into a cache write.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>The rubric file is a prompt<span>criteria/*.md · README</span></h4>
+    <p>A model-graded Criterion&#8217;s body is sent on every call, so its history is prompt weight
+    on every Listing, and telling a grader that its rubric does not discriminate is a hint it does
+    not need. Anchor every level on something the advert said, never on its silence: a &#8220;5 for
+    nothing either way&#8221; anchor turns an absence into a determined grade. Say
+    <code>unknown: skip</code> and let it come back unknown.</p>
+  </div>
+
+  <div class="rule-row">
+    <h4>Replays write nothing that a decision was taken on<span>rescore · report --weights · backfill</span></h4>
+    <p>An evaluated Listing is never evaluated twice, so an edited brief acts only on Listings that
+    have not arrived yet. The replays exist to show what the edit would have done to the ones that
+    have, and they leave the stored Score alone on purpose: overwriting it would silently rewrite the
+    calibration data, so a flat approved at 8.0 would be compared against a decision taken on a
+    number that no longer exists anywhere.</p>
+  </div>
+</div>
+    </section>
+
+    <!-- ═══════════════════ 09 · FILES ═════════════════════════════ -->
+    <section>
+<p class="eyebrow">09 — On disk</p>
+<h2>What lives where</h2>
+
+<div class="table-wrap">
+<table class="plain">
+  <thead><tr><th>Path</th><th>What it holds</th><th>In git?</th></tr></thead>
+  <tbody>
+    <tr><td><code>criteria/*.md</code></td><td>The brief, one Criterion per file. <code>_brief.md</code> and <code>_fields.md</code> are the shared preamble; <code>criteria.md</code> is the naive baseline&#8217;s single document; <code>retired/</code> is where a Criterion goes to stop counting</td><td class="num">yes</td></tr>
+    <tr><td><code>config.toml</code></td><td>Hard filters, the two thresholds, the models, the feature flags</td><td class="num">yes</td></tr>
+    <tr><td><code>.env</code></td><td><code>ANTHROPIC_API_KEY</code>, and optionally a <code>LOGFIRE_TOKEN</code></td><td class="num">no</td></tr>
+    <tr><td><code>data/flats.db</code></td><td>SQLite. <code>listings</code> is one row per (portal, id) with the fetched fields, the image reading, the Score and Verdict and the status. <code>criterion_grades</code> is one row per Listing and Criterion, with the evidence and the rubric hash. <code>events</code> is an append-only log of everything that happened to a row. <code>measure_runs</code> and <code>posterior_fit</code> serve <code>grade --measure</code> and <code>fit</code></td><td class="num">no</td></tr>
+    <tr><td><code>data/images/</code></td><td>One directory per Listing holding its photo, floorplan and EPC as <code>check</code> downloaded them. The vision reading and <code>annotate --db</code> read these before touching a URL</td><td class="num">no</td></tr>
+    <tr><td><code>tests/fixtures/floorplans/</code></td><td>The floorplan corpus and <code>annotations.toml</code>, the human ground truth</td><td class="num">yes</td></tr>
+    <tr><td><code>src/flat_scout/</code></td><td><code>cli</code> → <code>pipeline</code> → <code>fetch</code>, <code>vision</code> + <code>compass</code>, <code>grading</code> + <code>graders</code>, <code>adjudicate</code>, <code>db</code>. <code>criteria</code> loads the brief; <code>report</code> reads the database; <code>annotate</code> and <code>benchmark</code> are the ground-truth pair; <code>observe</code> is progress bars and logfire</td><td class="num">yes</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="cards three" style="margin-top:1.5rem">
+  <div class="card">
+    <div class="card-header"><span class="card-dot soft"></span><h3>What it deliberately doesn&#8217;t do</h3></div>
+    <ul>
+      <li>Download a Zoopla page. Zoopla challenges every automated client, and the challenge is not worked around.</li>
+      <li>Contact anyone. Nothing here sends anything.</li>
+      <li>Merge cross-portal duplicates.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-dot ink"></span><h3>Watching it run</h3></div>
+    <ul>
+      <li>Every long command prints a progress bar, or a line every thirty seconds when there is no terminal.</li>
+      <li>With a <code>LOGFIRE_TOKEN</code>, every model call, image download and page fetch is a traced span carrying tokens, latency and the Criterion that asked. Without one, nothing is configured and nothing leaves the machine.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-dot muted"></span><h3>Switched off, still there</h3></div>
+    <ul>
+      <li><code>bayesian_verdict = false</code>: the point Score and <code>coverage_floor</code> decide the Verdict. <code>posterior.py</code> and <code>fit</code> remain for anyone who wants the posterior gate back, where an unread Criterion widens the Score&#8217;s interval instead of tripping a floor.</li>
+    </ul>
+  </div>
+</div>
+    </section>
+
+    <div class="footer">
+<span>flat-scout · written by Šimon Podhajský for his own 2026 flat search · adapted for the workshop</span>
+<span>drawn 2026-09-05</span>
+    </div>
+
+  </div>
+</body>
+</html>

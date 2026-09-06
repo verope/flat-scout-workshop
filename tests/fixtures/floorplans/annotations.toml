@@ -1,0 +1,225 @@
+# Ground truth for the floorplan corpus, written by a human looking at
+# each drawing. Bearings are ON THE IMAGE: 0 = up the page, 90 = right, 180 = down, 270 = left.
+#
+# north_clock    which way the drawn north indicator points.
+#                Delete the line entirely if no indicator is drawn.
+# windows_clock  which way the main living space's windows face. One
+#                entry per direction; a dual-aspect flat has two.
+# compass_style  arrow | circle | rose | none
+# done           set to true when you have finished this plan.
+
+[plan.160824506]
+file = "160824506.png"
+address = ""
+north_clock = 230
+windows_clock = [357, 270]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.161883434]
+file = "161883434.jpg"
+address = ""
+# north_clock = 0
+windows_clock = [357, 207, 181]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.87174279]
+file = "87174279.png"
+address = ""
+north_clock = 297
+windows_clock = [358, 282]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.88643514]
+file = "88643514.jpg"
+address = ""
+north_clock = 358
+windows_clock = [355, 180]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.89642424]
+file = "89642424.png"
+address = ""
+north_clock = 24
+windows_clock = [273]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.91941729]
+file = "91941729.jpg"
+address = ""
+north_clock = 256
+windows_clock = [358]
+compass_style = ""
+notes = ""
+done = true
+
+[plan.92056239]
+file = "92056239.jpg"
+address = ""
+north_clock = 213
+windows_clock = [357, 60, 69]
+compass_style = "arrow"
+notes = ""
+done = true
+
+[plan.92065416]
+file = "92065416.gif"
+address = ""
+north_clock = 117
+windows_clock = [356]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.92067690]
+file = "92067690.jpg"
+address = ""
+north_clock = 75
+windows_clock = [346]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.92067954]
+file = "92067954.jpg"
+address = ""
+north_clock = 271
+windows_clock = [179]
+compass_style = "circle"
+notes = ""
+done = true
+
+[plan.92068848]
+file = "92068848.jpg"
+address = ""
+north_clock = 202
+windows_clock = [45]
+compass_style = "arrow"
+notes = ""
+done = true
+
+[plan.92073276]
+file = "92073276.gif"
+address = ""
+# north_clock = 0
+windows_clock = [178, 90]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92073510]
+file = "92073510.jpg"
+address = ""
+# north_clock = 0
+windows_clock = [0, 270]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92076474]
+file = "92076474.jpg"
+address = ""
+north_clock = 355
+windows_clock = [36, 15, 0]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.92081691]
+file = "92081691.png"
+address = ""
+# north_clock = 0
+windows_clock = [274]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92082768]
+file = "92082768.jpg"
+address = ""
+# north_clock = 0
+windows_clock = [270]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92082783]
+file = "92082783.jpg"
+address = ""
+# north_clock = 0
+windows_clock = [0]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92084112]
+file = "92084112.jpg"
+address = ""
+north_clock = 79
+windows_clock = [345, 13, 275]
+compass_style = "circle"
+notes = ""
+done = true
+
+[plan.92086077]
+file = "92086077.jpg"
+address = ""
+# north_clock = 0
+windows_clock = [0, 270]
+compass_style = "none"
+notes = ""
+done = true
+
+[plan.92093301]
+file = "92093301.jpg"
+address = ""
+north_clock = 278
+windows_clock = [1, 180]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.92094420]
+file = "92094420.jpg"
+address = ""
+north_clock = 233
+windows_clock = [274, 92]
+compass_style = "arrow"
+notes = ""
+done = true
+
+[plan.92094612]
+file = "92094612.jpg"
+address = ""
+north_clock = 211
+windows_clock = [271, 91]
+compass_style = "circle"
+notes = ""
+done = true
+
+[plan.92096835]
+file = "92096835.jpg"
+address = ""
+north_clock = 203
+windows_clock = [270]
+compass_style = "rose"
+notes = ""
+done = true
+
+[plan.92098377]
+file = "92098377.jpg"
+address = ""
+north_clock = 51
+windows_clock = [274]
+compass_style = "rose"
+notes = ""
+done = true

@@ -1,0 +1,52 @@
+[filters]
+# Hard filters, applied before any model call. A Listing that fails one is
+# never graded, and never reaches a report. Deliberately wide for the workshop
+# corpus, so that what the graders say about a flat is what decides it.
+max_price_pcm = 6000
+allowed_beds = [0, 1, 2]       # 0 == studio
+exclude_ground_floor = false
+postcodes = []                 # empty means any postcode
+
+[evaluation]
+model = "anthropic:claude-sonnet-5"
+# Reads the EPC graph and the floorplan. Empty means "same as model".
+vision_model = ""
+# A Listing whose Score reaches this, with Coverage at or above coverage_floor,
+# gets a hopeful Verdict. Set it from the histogram `flat-scout report` prints
+# once the corpus is graded, not from a guess.
+hopeful_threshold = 6.5
+# The single-document brief the naive evaluator reads while
+# features.weighted_criteria is off.
+criteria_path = "criteria/criteria.md"
+# One Criterion per file. The loader reads criteria/*.md and does not recurse,
+# so criteria/retired/ is where a Criterion goes to stop counting.
+criteria_dir = "criteria"
+# Below this share of the total Criterion weight a Listing cannot be hopeful,
+# whatever it scores. Set it from the coverage distribution
+# `flat-scout grade --backfill` prints.
+coverage_floor = 0.35
+# The p in P(score >= hopeful_threshold) >= p. Only read while
+# features.bayesian_verdict is on.
+hopeful_confidence = 0.50
+
+[fetch]
+delay_seconds = 4
+max_attempts = 4
+timeout_seconds = 30
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+
+[features]
+# Reads the EPC band off the EPC graph and the layout off the floorplan, both
+# of which are legible nowhere else. Costs a vision call per Listing that has
+# images and survives the pre-filter. Off, the graders work from the listing
+# text alone.
+image_signals = true
+# Report every wall a flat is glazed on. Off: the best-confirmed one only,
+# which measures better on the annotated floorplans.
+multi_aspect = false
+# The weighted Criteria in criteria/*.md, one model call per model-graded
+# Criterion. Off: the naive baseline - criteria/criteria.md is sent to the
+# model once and it returns one score for the whole brief.
+weighted_criteria = true
+# The posterior Verdict of the Bayesian-scoring spec. Off: the point score and coverage_floor rule.
+bayesian_verdict = false
