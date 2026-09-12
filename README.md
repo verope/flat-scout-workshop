@@ -39,6 +39,13 @@ Downloads one Rightmove or OpenRent listing, reads its EPC and floorplan with a
 vision model, grades it against every Criterion and stores the lot in
 `data/flats.db`, with its images cached under `data/images/`. Prints the row.
 
+`--holistic` sends `criteria/criteria.md` to the model once and takes back one
+score; `--weighted` grades one Criterion at a time from `criteria/*.md`. Either
+overrides `weighted_criteria` in `config.toml` for this run only. A listing
+already evaluated is normally left alone, so to grade the same listing both
+ways run `check --holistic <url>` and then `check --weighted --force <url>`.
+The printed row's `evaluation_mode` says which one ran last.
+
 ```sh
 uv run flat-scout grade --backfill
 ```
