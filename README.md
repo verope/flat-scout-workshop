@@ -19,6 +19,10 @@ uv sync
 cp .env.example .env    # then put your ANTHROPIC_API_KEY in it
 ```
 
+You need your own [Anthropic API key](https://console.anthropic.com/); every
+model call is billed to it. A `check` on one listing costs about 7 cents on
+Sonnet 5.
+
 `data/` holds the database and the cached listing images and is not in the
 repository. If you were handed a workshop package, copy its `data/` directory
 into the repository root before running anything. Without it, `check` builds
