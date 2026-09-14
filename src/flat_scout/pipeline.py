@@ -134,6 +134,7 @@ async def process_url(
     model=None,
     vision_model=None,
     fields: dict | None = None,
+    force: bool = False,
 ) -> int | None:
     """Take one Listing URL as far as a Verdict, under a span. See `_take`.
 
@@ -141,9 +142,9 @@ async def process_url(
     vision calls and the evaluation all nest under it, which is what makes
     "why did that one Listing take ninety seconds" a question with an answer.
     """
-    with span("process listing", url=url, source=source):
+    with span("process listing", url=url, source=source, force=force):
         return await _take(
-            url, db, settings, source, client, model, vision_model, fields
+            url, db, settings, source, client, model, vision_model, fields, force
         )
 
 
@@ -156,6 +157,7 @@ async def _take(
     model=None,
     vision_model=None,
     fields: dict | None = None,
+    force: bool = False,
 ) -> int | None:
     """Take one Listing URL as far as a Verdict. Returns the listing id.
 
@@ -165,6 +167,13 @@ async def _take(
 
     `vision_model` falls back to `model`, so a caller overriding the model for a
     test overrides both agents and neither reaches a real provider.
+
+    `force` runs the evaluation again over a Listing that already has one, and
+    overwrites what was stored. The page is not downloaded again and a stored
+    image reading is reused, so it costs the evaluation and nothing else. It is
+    how one Listing gets graded under both evaluators to compare them. A
+    Listing with a Decision on it is still left alone: the Decision was taken
+    on the score that is there, and `report --decisions` reads them together.
     """
     parsed = canonicalise(url)
     if parsed is None:
@@ -187,8 +196,9 @@ async def _take(
         ListingData(portal=portal, portal_id=portal_id, url=canonical, **seed),
         source=source,
     )
-    if db.get(listing_id)["status"] not in ("new", "fetch_pending"):
-        return listing_id  # already decided or already evaluated
+    status = db.get(listing_id)["status"]
+    if not (status in ("new", "fetch_pending") or (force and status == "evaluated")):
+        return listing_id  # already decided, or already evaluated and not forced
 
     # Pre-filter on the fields we already have, before spending a download.
     reason = prefilter(listing_from_row(db.get(listing_id)), settings.filters)

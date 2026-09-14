@@ -31,17 +31,44 @@ def main() -> None:
 
 
 @app.command()
-def check(url: str, config: Path = Path("config.toml")) -> None:
-    """Download, pre-filter and evaluate a single Listing URL."""
+def check(
+    url: str,
+    config: Path = Path("config.toml"),
+    holistic: bool = typer.Option(
+        False, "--holistic", help="One model call over criteria/criteria.md, one score."
+    ),
+    weighted: bool = typer.Option(
+        False, "--weighted", help="One grade per Criterion in criteria/*.md."
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Evaluate again even if this Listing already has a Verdict."
+    ),
+) -> None:
+    """Download, pre-filter and evaluate a single Listing URL.
+
+    Which evaluator runs is `features.weighted_criteria` in config.toml.
+    --holistic and --weighted override it for this run only; the file is not
+    touched. An evaluated Listing is otherwise never evaluated again, so
+    comparing the two evaluators on one Listing is `check --holistic` followed
+    by `check --weighted --force`. The stored row records which one ran last
+    in `evaluation_mode`.
+    """
+    if holistic and weighted:
+        typer.echo("--holistic and --weighted are separate evaluators. Pass one.")
+        raise typer.Exit(2)
     from flat_scout.observe import start
 
     settings = load_settings(config)
+    if holistic or weighted:
+        settings.features.weighted_criteria = weighted
     start(settings, service="check")
     db = Database(DB_PATH)
 
     async def run() -> None:
         async with build_async_client(settings) as client:
-            listing_id = await process_url(url, db, settings, "manual", client)
+            listing_id = await process_url(
+                url, db, settings, "manual", client, force=force
+            )
         if listing_id is None:
             typer.echo("Not a recognised Portal listing URL.")
             raise typer.Exit(1)

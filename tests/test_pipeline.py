@@ -650,3 +650,42 @@ async def test_a_stored_reading_is_ignored_once_image_signals_are_off(tmp_path, 
     async with httpx.AsyncClient() as client:
         await process_url(URL, db, settings, "alert", client, model=TestModel())
     assert seen == [None]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_a_repeat_ingest_leaves_an_evaluated_listing_alone(tmp_path):
+    """The second run is a no-op: same stored mode, no second download."""
+    route = respx.get(URL).mock(return_value=httpx.Response(200, html=GOOD_HTML))
+    db = Database(tmp_path / "flats.db")
+    settings = settings_for(tmp_path)
+    async with httpx.AsyncClient() as client:
+        listing_id = await process_url(URL, db, settings, "manual", client, model=TestModel())
+        settings.features.weighted_criteria = True
+        await process_url(URL, db, settings, "manual", client, model=TestModel())
+    assert db.get(listing_id)["evaluation_mode"] == "holistic"
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_force_re_evaluates_an_evaluated_listing_without_downloading_again(tmp_path):
+    """`check --force` is how the same Listing gets graded both ways to be
+    compared. The page is already in the row, so only the evaluation runs."""
+    route = respx.get(URL).mock(return_value=httpx.Response(200, html=GOOD_HTML))
+    db = Database(tmp_path / "flats.db")
+    settings = settings_for(tmp_path)
+    async with httpx.AsyncClient() as client:
+        listing_id = await process_url(URL, db, settings, "manual", client, model=TestModel())
+        assert db.get(listing_id)["evaluation_mode"] == "holistic"
+        settings.features.weighted_criteria = True
+        graded = TestModel(custom_output_args={"grade": 7.0, "evidence": "seems fine"})
+        again = await process_url(
+            URL, db, settings, "manual", client, model=graded, force=True
+        )
+    assert again == listing_id
+    row = db.get(listing_id)
+    assert row["status"] == "evaluated"
+    assert row["evaluation_mode"] == "weighted"
+    assert db.criterion_grades(listing_id) != {}
+    assert route.call_count == 1
