@@ -74,8 +74,32 @@ def check(
             raise typer.Exit(1)
         row = db.get(listing_id)
         typer.echo(json.dumps({key: row[key] for key in row.keys()}, indent=2, default=str))
+        if row["evaluation_mode"] == "weighted":
+            typer.echo(grade_vector(db, settings, listing_id))
 
     asyncio.run(run())
+
+
+def grade_vector(db: Database, settings, listing_id: int) -> str:
+    """The weighted evaluator's working, one line per Criterion.
+
+    The row above it carries the Score and the Verdict and nothing about how
+    they were reached: the grades live in `criterion_grades` and the weights
+    in `criteria/*.md`. This is the join, printed, so a reader of `check`
+    sees which Criterion answered, what it read it off, and how much it
+    weighed.
+    """
+    from flat_scout.criteria import load_criteria
+    from flat_scout.graders import GRADERS
+
+    criteria = load_criteria(Path(settings.evaluation.criteria_dir), known_graders=set(GRADERS))
+    lines = ["", "Grades"]
+    for criterion, grade in db.graded_pairs(listing_id, criteria):
+        mark = f"{grade.value:4.1f}" if grade.value is not None else "   ?"
+        lines.append(f"  {mark}  w{criterion.weight:g}  {criterion.name}")
+        if grade.evidence:
+            lines.append(f"             {grade.evidence}")
+    return "\n".join(lines)
 
 
 @app.command()

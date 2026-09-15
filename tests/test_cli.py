@@ -82,3 +82,55 @@ def test_check_force_reaches_the_pipeline(tmp_path, monkeypatch):
     captured = _capture_process_url(monkeypatch, tmp_path)
     runner.invoke(cli.app, ["check", "https://example.com/x", "--force"])
     assert captured["force"] is True
+
+
+def test_check_prints_the_grade_vector_after_a_weighted_evaluation(tmp_path, monkeypatch):
+    """The row alone hides what the weighted evaluator actually did. The
+    grades live in their own table and the weights in the Criterion files,
+    and the demo had to reach for SQL to show either."""
+    from flat_scout.db import Database
+    from flat_scout.criteria import Criterion
+    from flat_scout.grading import Grade
+    from flat_scout.models import ListingData
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "criteria").mkdir()
+    (tmp_path / "criteria" / "lift.md").write_text(
+        "---\nname: A lift above the second floor\ndescription: d\nweight: 2\n"
+        "grade:\n  model: true\nunknown: skip\n---\n\n## Rubric\n**10** — lift.\n"
+    )
+    (tmp_path / "config.toml").write_text(
+        '[features]\nweighted_criteria = true\n[evaluation]\ncriteria_dir = "criteria"\n'
+    )
+    (tmp_path / "data").mkdir()
+    db = Database(tmp_path / "data" / "flats.db")
+    listing_id = db.upsert(
+        ListingData(portal="rightmove", portal_id="1", url="https://www.rightmove.co.uk/properties/1"),
+        "manual",
+    )
+    criterion = Criterion(
+        slug="lift", name="A lift above the second floor", description="d", weight=2,
+        grade={"model": True}, body="## Rubric\n**10** — lift.",
+    )
+    db.set_criterion_grades(
+        listing_id,
+        [(criterion, Grade(criterion="lift", value=10.0, determined=True,
+                           evidence="Third floor with a lift.", graded_by="model:x"))],
+    )
+    db.conn.execute(
+        "UPDATE listings SET evaluation_mode = 'weighted' WHERE id = ?", (listing_id,)
+    )
+    db.conn.commit()
+
+    async def fake_process_url(url, db, settings, source, client, **kwargs):
+        return listing_id
+
+    monkeypatch.setattr(cli, "process_url", fake_process_url)
+    result = runner.invoke(cli.app, ["check", "https://www.rightmove.co.uk/properties/1"])
+
+    assert result.exit_code == 0, result.output
+    grades = result.output[result.output.index("Grades"):]
+    assert "A lift above the second floor" in grades
+    assert "10.0" in grades
+    assert "w2" in grades or "weight 2" in grades
+    assert "Third floor with a lift." in grades
