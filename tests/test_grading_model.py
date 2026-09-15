@@ -3,6 +3,7 @@ import asyncio
 import pytest
 from pydantic_ai import CachePoint
 from pydantic_ai.messages import UserPromptPart
+from pydantic_ai.exceptions import ModelHTTPError
 from pydantic_ai.models.test import TestModel
 
 from flat_scout.config import Settings
@@ -322,3 +323,35 @@ async def test_grade_listing_returns_one_pair_for_every_criterion_in_order():
     pairs = await grade_listing(criteria, a_listing(sqft=600), None, Settings(), PREAMBLE, model=model)
     assert [criterion.slug for criterion, _ in pairs] == ["a-first", "b-second"]
     assert [grade.criterion for _, grade in pairs] == ["a-first", "b-second"]
+
+
+class FlakyOnce(TestModel):
+    """A 429 on the first request, then the ordinary answer."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._failed = False
+
+    async def request(self, *args, **kwargs):
+        if not self._failed:
+            self._failed = True
+            raise ModelHTTPError(status_code=429, model_name="flaky", body=None)
+        return await super().request(*args, **kwargs)
+
+
+@pytest.mark.asyncio
+async def test_a_rate_limited_grade_is_asked_again_rather_than_lost(monkeypatch):
+    """One 429 used to cost the Criterion: `by_model` reports "could not be
+    reached" on any exception, and the coverage drops on a fine Listing."""
+    from flat_scout import backoff
+
+    async def no_wait(seconds: float) -> None:
+        pass
+
+    monkeypatch.setattr(backoff, "_sleep", no_wait)
+    grade = await grade_one(
+        a_criterion("m", {"model": True}), a_listing(), None, Settings(), PREAMBLE,
+        model=FlakyOnce(custom_output_args={"grade": 7.0, "evidence": "fine"}),
+    )
+    assert grade.value == 7.0
+    assert grade.determined is True

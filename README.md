@@ -38,7 +38,7 @@ after that, the vision reading, `grade`, `annotate --db`, reads the local file
 first, so once a listing is in `data/` nothing depends on the portal still
 serving it.
 
-## The five commands
+## The six commands
 
 ```sh
 uv run flat-scout check <listing-url>
@@ -53,6 +53,16 @@ overrides `weighted_criteria` in `config.toml` for this run only. A listing
 already evaluated is normally left alone, so to grade the same listing both
 ways run `check --holistic <url>` and then `check --weighted --force <url>`.
 The printed row's `evaluation_mode` says which one ran last.
+
+```sh
+uv run flat-scout evaluate
+```
+What `check` does for one URL, over every stored listing that has no verdict
+yet, several at once. Nothing is downloaded again and a listing already
+evaluated is left alone, so a second run is free and an interrupted one
+picks up where it stopped. `--limit 3` prices it first; `--concurrency 8`
+is how many listings are in flight. Every model call retries a rate limit
+or an outage with jittered backoff, so one 429 costs a wait, not a grade.
 
 ```sh
 uv run flat-scout grade --backfill

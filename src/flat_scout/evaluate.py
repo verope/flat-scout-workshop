@@ -11,6 +11,7 @@ from dataclasses import asdict
 
 from pydantic_ai import Agent
 
+from flat_scout.backoff import with_backoff
 from flat_scout.config import Filters, Settings
 from flat_scout.models import Evaluation, ImageReading, ListingData, ModelVerdict
 from flat_scout.observe import span
@@ -146,7 +147,7 @@ async def evaluate_listing(
         portal_id=listing.portal_id,
         with_images=reading is not None,
     ):
-        result = await agent.run(build_prompt(listing, criteria, reading))
+        result = await with_backoff(lambda: agent.run(build_prompt(listing, criteria, reading)))
     # The holistic path counts no Criteria, so it reports no coverage. The
     # default of 0.0 would read as "nothing could be determined", which is why
     # the choice between this path and `pipeline.evaluate_weighted`, and the

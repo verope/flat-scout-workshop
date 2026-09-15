@@ -21,6 +21,7 @@ from flat_scout.adjudicate import Grade
 from flat_scout.config import Settings
 from flat_scout.criteria import Criterion
 from flat_scout.evaluate import IMAGE_HEADING, LISTING_HEADING, facts_block
+from flat_scout.backoff import with_backoff
 from flat_scout.models import ImageReading, ListingData
 from flat_scout.observe import span
 from flat_scout.vision import render_reading
@@ -283,11 +284,13 @@ async def by_model(
         # The wait for `gate` is inside the span deliberately: time queued
         # behind the concurrency cap is time the run is spending.
         with span("grade criterion", criterion=criterion.slug, model=str(model_name)):
+            # The retries happen inside the gate: a call waiting out a 429
+            # is still a call the provider is being asked about.
             if gate is not None:
                 async with gate:
-                    result = await agent.run(prompt)
+                    result = await with_backoff(lambda: agent.run(prompt))
             else:
-                result = await agent.run(prompt)
+                result = await with_backoff(lambda: agent.run(prompt))
     except Exception as exc:  # noqa: BLE001 - one Criterion, not the Listing
         # An outage costs this Criterion and nothing else. The Listing still
         # gets a score off whatever else was determined, and the coverage

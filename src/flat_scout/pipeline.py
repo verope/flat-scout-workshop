@@ -20,6 +20,7 @@ from flat_scout.fetch import (
     BotChallenge,
     FetchError,
     ListingUnavailable,
+    build_async_client,
     fetch_listing,
     is_fetchable,
 )
@@ -344,6 +345,68 @@ async def _take(
     )
     db.transition(listing_id, "evaluated")
     return listing_id
+
+
+async def evaluate_stored(
+    db: Database,
+    settings: Settings,
+    model=None,
+    vision_model=None,
+    limit: int = 0,
+    concurrency: int = 8,
+) -> list[int]:
+    """Take every stored Listing that has no Verdict to one, several at once.
+
+    `check` is one URL, downloaded and evaluated in turn, and a workshop
+    package arrives as a few hundred Listings already downloaded and none of
+    them evaluated. Walking `check` over them one at a time measured 78
+    seconds a Listing on the default model, which for this corpus is an
+    afternoon. The Listings are independent, so they run together.
+
+    `concurrency` bounds the LISTINGS in flight, not the calls: a Listing
+    grades its Criteria one call first and the rest at once, so the calls in
+    flight are at most that many times the fan-out. That is the intended
+    shape - a Listing's siblings must run while its warm cache entry is alive,
+    and gating the calls instead would queue them behind other Listings' warm
+    calls. A provider's rate limit is met by `with_backoff` inside each call
+    rather than by throttling here.
+
+    The page is not downloaded again - `process_url` sees `fetch_status` and
+    skips the fetch - and a stored image reading is reused, so a run costs the
+    grades and the vision reads still missing, and nothing else. One failed
+    Listing is logged and stays `new` for the next run; the rest carry on.
+    """
+    rows = db.conn.execute(
+        "SELECT id, url FROM listings WHERE status = 'new' AND fetch_status = 'ok' ORDER BY id"
+    ).fetchall()
+    if limit:
+        rows = rows[:limit]
+    gate = asyncio.Semaphore(concurrency)
+    done: list[int] = []
+
+    async def one(row: sqlite3.Row, client: httpx.AsyncClient) -> None:
+        async with gate:
+            try:
+                with span("evaluate stored", listing_id=row["id"]):
+                    listing_id = await process_url(
+                        row["url"], db, settings, "stored", client, model, vision_model
+                    )
+            except Exception as exc:  # noqa: BLE001 - one Listing, not the run
+                log.error("evaluating listing %s failed: %s", row["id"], exc)
+                watch.tick(failed=True)
+                return
+            # `process_url` swallows an evaluation failure itself and leaves
+            # the row `new`; only a row that reached a Verdict counts as done.
+            if listing_id is not None and db.get(listing_id)["status"] == "evaluated":
+                done.append(listing_id)
+                watch.tick()
+            else:
+                watch.tick(failed=True)
+
+    with Progress(len(rows), "evaluating Listings") as watch:
+        async with build_async_client(settings) as client:
+            await asyncio.gather(*(one(row, client) for row in rows))
+    return sorted(done)
 
 
 async def rescore(

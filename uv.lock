@@ -7,6 +7,10 @@ resolution-markers = [
     "sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
+[options]
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer-span = "P2D"
+
 [[package]]
 name = "aiofile"
 version = "3.12.3"
@@ -793,8 +797,8 @@ name = "httpcore2"
 version = "2.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "h11" },
-    { name = "truststore" },
+    { name = "h11", marker = "sys_platform != 'emscripten'" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a9/83/a896fc59940fc5a6e2aff3a4be1d92fa890112936803b331cae75a993c34/httpcore2-2.10.0.tar.gz", hash = "sha256:13c0cc3d1919d4f28457f60cd2c2abe04113a8af184ccf1142811beba936f9dc", size = 67427, upload-time = "2026-08-09T09:11:32.123Z" }
 wheels = [
@@ -2216,8 +2220,8 @@ name = "secretstorage"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cryptography" },
-    { name = "jeepney" },
+    { name = "cryptography", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "jeepney", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be", size = 19884, upload-time = "2025-11-23T19:02:53.191Z" }
 wheels = [

@@ -79,6 +79,33 @@ def check(
 
 
 @app.command()
+def evaluate(
+    config: Path = Path("config.toml"),
+    limit: int = 0,
+    concurrency: int = typer.Option(8, help="Listings in flight at once."),
+) -> None:
+    """Evaluate every stored Listing that has no Verdict yet, several at once.
+
+    What `check` does for one URL, over the whole stored corpus: the vision
+    read where one is missing, a grade per Criterion, a Score, a Verdict.
+    Pages are never downloaded again. A Listing already evaluated is left
+    alone, so a second run costs nothing and a run that was interrupted picks
+    up where it stopped. `--limit 3` prices it first.
+    """
+    from flat_scout.observe import start
+    from flat_scout.pipeline import evaluate_stored
+    from flat_scout.report import status_counts
+
+    settings = load_settings(config)
+    start(settings, service="evaluate")
+    db = Database(DB_PATH)
+    done = asyncio.run(evaluate_stored(db, settings, limit=limit, concurrency=concurrency))
+    typer.echo(f"evaluated {len(done)} Listings")
+    for name, count in status_counts(db):
+        typer.echo(f"{name:>16}  {count}")
+
+
+@app.command()
 def status(config: Path = Path("config.toml")) -> None:
     """Count Listings by status."""
     from flat_scout.report import status_counts

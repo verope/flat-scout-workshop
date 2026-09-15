@@ -52,6 +52,7 @@ from PIL import Image
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, BinaryContent
 
+from flat_scout.backoff import with_backoff
 from flat_scout.config import Settings
 from flat_scout.compass import (
     Bearing,
@@ -451,7 +452,7 @@ async def _read_aspect(
         name="floorplan-aspect",
     )
     try:
-        result = await agent.run([ASPECT_PROMPT, plan])
+        result = await with_backoff(lambda: agent.run([ASPECT_PROMPT, plan]))
     except Exception as exc:  # noqa: BLE001 - one unconfirmed field, not the reading
         log.warning("could not read the compass: %s", exc)
         return _AspectRead()
@@ -764,7 +765,7 @@ async def read_images(
         floorplan=floorplan is not None,
         certificate=epc is not None and epc.is_certificate,
     ):
-        result = await agent.run(prompt)
+        result = await with_backoff(lambda: agent.run(prompt))
     # Vision is the only per-Listing cost in the app that scales with images, so
     # the tokens it spent are worth having in the log when the bill arrives.
     usage = result.usage

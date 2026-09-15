@@ -142,3 +142,38 @@ def test_a_floor_from_a_plan_never_removes_a_listing_by_itself(tmp_path):
     source = inspect.getsource(pipeline._take)
     after = source[source.index("set_floor_from_plan") :]
     assert "prefiltered_out" not in after
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_a_rate_limited_image_read_is_asked_again(monkeypatch):
+    """The vision read is one call per Listing, and losing it loses every
+    image signal at once - the band, the floor, the layout."""
+    from pydantic_ai.exceptions import ModelHTTPError
+
+    from flat_scout import backoff
+
+    async def no_wait(seconds: float) -> None:
+        pass
+
+    monkeypatch.setattr(backoff, "_sleep", no_wait)
+    inner = reader({"floor_text": None, "epc_band": "C"})
+    state = {"failed": False}
+
+    async def flaky(*args, **kwargs):
+        if not state["failed"]:
+            state["failed"] = True
+            raise ModelHTTPError(status_code=503, model_name="flaky", body=None)
+        return await type(inner).request(inner, *args, **kwargs)
+
+    monkeypatch.setattr(inner, "request", flaky)
+    settings = Settings()
+    respx.get("https://media.example.com/epc.png").mock(
+        return_value=httpx.Response(200, content=PNG, headers={"content-type": "image/png"})
+    )
+    async with httpx.AsyncClient() as client:
+        reading = await read_images(
+            a_listing(floorplan_url=None, epc_image_url="https://media.example.com/epc.png"),
+            settings, client, model=inner,
+        )
+    assert reading.epc_band == "C"

@@ -689,3 +689,110 @@ async def test_force_re_evaluates_an_evaluated_listing_without_downloading_again
     assert row["evaluation_mode"] == "weighted"
     assert db.criterion_grades(listing_id) != {}
     assert route.call_count == 1
+
+
+# --- evaluating the stored corpus at once ---------------------------------
+
+
+def seed_url(n: int) -> str:
+    return f"https://www.rightmove.co.uk/properties/9205{n:04d}"
+
+
+async def seeded(db: Database, settings: Settings, n: int) -> list[int]:
+    """`n` Listings downloaded and evaluated once, then put back to `new`.
+
+    A workshop package arrives exactly like this: fetched, cached, ungraded.
+    """
+    ids = []
+    async with httpx.AsyncClient() as client:
+        for i in range(n):
+            respx.get(seed_url(i)).mock(return_value=httpx.Response(200, html=GOOD_HTML))
+            ids.append(
+                await process_url(seed_url(i), db, settings, "manual", client, model=TestModel())
+            )
+    db.conn.execute(
+        "UPDATE listings SET status = 'new', score = NULL, verdict = NULL, evaluated_at = NULL"
+    )
+    db.conn.commit()
+    return ids
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_evaluate_stored_takes_every_new_listing_to_a_verdict(tmp_path):
+    from flat_scout.pipeline import evaluate_stored
+
+    mock_epc()
+    mock_photo()
+    db = Database(tmp_path / "flats.db")
+    settings = settings_for(tmp_path)
+    ids = await seeded(db, settings, 3)
+    # One of them already has a Verdict, and must be left alone.
+    db.conn.execute("UPDATE listings SET status = 'evaluated', score = 9.0 WHERE id = ?", (ids[0],))
+    db.conn.commit()
+
+    fetched_before = len(respx.calls)
+
+    done = await evaluate_stored(db, settings, model=verdict_model([]), concurrency=2)
+
+    assert sorted(done) == ids[1:]
+    for listing_id in ids[1:]:
+        row = db.get(listing_id)
+        assert row["status"] == "evaluated"
+        assert row["score"] == 5.0
+    assert db.get(ids[0])["score"] == 9.0
+    assert len(respx.calls) == fetched_before, "nothing is downloaded again"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_evaluate_stored_bounds_the_listings_in_flight(tmp_path):
+    """`concurrency` Listings open at once, and no more.
+
+    The holistic evaluator makes one call per Listing, so calls in flight
+    are Listings in flight.
+    """
+    import asyncio
+
+    from flat_scout.pipeline import evaluate_stored
+
+    mock_epc()
+    mock_photo()
+    db = Database(tmp_path / "flats.db")
+    settings = settings_for(tmp_path)
+    await seeded(db, settings, 5)
+
+    in_flight = {"now": 0, "peak": 0}
+
+    async def slow(messages, info: AgentInfo) -> ModelResponse:
+        in_flight["now"] += 1
+        in_flight["peak"] = max(in_flight["peak"], in_flight["now"])
+        await asyncio.sleep(0.01)
+        in_flight["now"] -= 1
+        return ModelResponse(
+            parts=[
+                ToolCallPart(
+                    info.output_tools[0].name,
+                    {"verdict": "borderline", "score": 5.0, "reasons": []},
+                )
+            ]
+        )
+
+    done = await evaluate_stored(db, settings, model=FunctionModel(slow), concurrency=2)
+    assert len(done) == 5
+    assert in_flight["peak"] == 2
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_evaluate_stored_limit_prices_the_run_first(tmp_path):
+    from flat_scout.pipeline import evaluate_stored
+
+    mock_epc()
+    mock_photo()
+    db = Database(tmp_path / "flats.db")
+    settings = settings_for(tmp_path)
+    await seeded(db, settings, 4)
+    done = await evaluate_stored(db, settings, model=verdict_model([]), limit=2)
+    assert len(done) == 2
+    assert db.conn.execute("SELECT count(*) FROM listings WHERE status = 'new'").fetchone()[0] == 2
