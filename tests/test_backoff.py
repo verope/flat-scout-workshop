@@ -111,3 +111,16 @@ async def test_a_timeout_or_connection_failure_is_retried():
     call, calls = failing_then(1, ModelAPIError(model_name="m", message="Request timed out."))
     assert await with_backoff(call, sleep=Sleeps(), rng=lambda: 0.0) == "ok"
     assert calls["n"] == 2
+
+
+@pytest.mark.asyncio
+async def test_the_default_budget_outlasts_a_short_outage():
+    """A network blip of forty seconds took one grade with it on the first
+    corpus run: six attempts with a 30s cap and full jitter can spend under
+    a minute. The default budget must cover a couple of minutes even at
+    the jitter's expectation."""
+    call, _ = failing_then(100, http_error(503))
+    sleeps = Sleeps()
+    with pytest.raises(ModelHTTPError):
+        await with_backoff(call, sleep=sleeps, rng=lambda: 0.5)
+    assert sum(sleeps.delays) >= 120

@@ -12,6 +12,11 @@ the calls that hit a limit hit it together, and a fixed schedule would send
 them all back together too. A `Retry-After` header wins over the curve when
 the provider sends one, capped the same way so a spiteful value cannot park
 the run.
+
+The budget is sized for an outage, not a hiccup. Ten attempts against a
+60s cap is about two minutes at the jitter's expectation and four at most:
+a forty-second network blip on the first corpus run outlasted six attempts
+against 30s and took a grade with it.
 """
 
 from __future__ import annotations
@@ -66,9 +71,9 @@ def _retry_after(exc: BaseException) -> float | None:
 async def with_backoff(
     call: Callable[[], Awaitable[T]],
     *,
-    attempts: int = 6,
+    attempts: int = 10,
     base: float = 1.0,
-    cap: float = 30.0,
+    cap: float = 60.0,
     sleep: Callable[[float], Awaitable[None]] | None = None,
     rng: Callable[[], float] | None = None,
 ) -> T:
