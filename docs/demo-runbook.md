@@ -68,7 +68,7 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
    uv run flat-scout report
    ```
 
-## Act two: is it any good (about 20 minutes)
+## Act two: is it any good (about 25 minutes)
 
 6. **Coverage.** A re-run is free and prints the coverage distribution. The
    point: a Score at 40% Coverage is a guess wearing a number's clothes.
@@ -103,13 +103,35 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
    uv run flat-scout report --weights
    ```
    Revert the edit afterwards (`git checkout criteria/lift.md`).
-11. **Ground truth.** The floorplan reader against the human annotations,
-    stage by stage. Two vision calls per plan; no database needed.
+11. **Where ground truth comes from.** Nothing in act two so far has said
+    whether a grade is *right*, only whether it is consistent and whether it
+    separates the decisions. For the floorplan reader there is a human
+    answer, and this is where it was written. Opens a page on port 8765 over
+    the 24 plans in `tests/fixtures/floorplans/`; click through one plan and
+    show the bearings being written down: where the north arrow points,
+    which walls the living-room windows are on, on the image, 0 up the page.
+    ```sh
+    uv run flat-scout annotate
+    ```
+    Then the file it writes, `tests/fixtures/floorplans/annotations.toml`.
+    Point at a `# north_clock` line commented out: no indicator drawn is a
+    real answer, and the benchmark scores "correctly silent" against it. The
+    stubs for new plans are left blank on purpose, so nobody is asked to
+    agree with the answer under test. `--no-serve` writes a static sheet to
+    `output/annotation-sheet.html` if the port is a problem; `--db data/flats.db`
+    would add the corpus's own floorplans, which is how the set grows.
+12. **The reader against that truth.** Stage by stage: north, window walls,
+    aspects. Two vision calls per plan, no database needed, about six
+    minutes; start it in a second terminal at the top of act two.
     ```sh
     uv run flat-scout benchmark
     ```
+    On the rehearsal: north right on 14 of 18, window walls on 22 of 24,
+    aspects on 6 of 17 with 6 abstentions. The "where it went wrong" rows
+    name the plan, the answer, the truth and the method, so a wrong answer
+    is a plan you can open in the annotator and look at.
 
-If short of time, drop step 10 first, then step 8.
+If short of time, drop step 10 first, then step 8. Keep 11 and 12 together.
 
 ## Attendees afterwards
 
