@@ -28,7 +28,7 @@ def seed(db: Database, portal_id: str, score: float, verdict: str = "borderline"
     db.set_evaluation(
         listing_id,
         Evaluation(verdict=verdict, score=score, reasons=["r"]),
-        "anthropic:claude-sonnet-5",
+        "openrouter:z-ai/glm-5.3-flash",
     )
     return listing_id
 
@@ -102,7 +102,7 @@ def store(
         db.set_evaluation(
             listing_id,
             Evaluation(verdict=verdict, score=score, reasons=reasons or ["a reason"]),
-            "anthropic:claude-sonnet-5",
+            "openrouter:z-ai/glm-5.3-flash",
         )
     db.transition(listing_id, "evaluated")
     return listing_id
@@ -519,7 +519,7 @@ def hidden(
     db.set_evaluation(
         listing_id,
         Evaluation(verdict=verdict, score=score, reasons=reasons or ["a reason"]),
-        "anthropic:claude-sonnet-5",
+        "openrouter:z-ai/glm-5.3-flash",
     )
     db.transition(listing_id, "evaluated")
     return listing_id

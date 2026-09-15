@@ -224,11 +224,19 @@ def build_criterion_prompt(
                       outside: caching a block that never repeats writes the
                       cache and never reads it.
 
-    Both prefixes clear Claude Sonnet 5's 1,024-token minimum, which is the
-    reason the system prompt does not get a breakpoint of its own. On its own
-    the system prompt and the tool definitions come to about 390 tokens, under
-    the minimum, so `anthropic_cache_instructions` would mark a boundary
-    Anthropic declines to cache - a wasted breakpoint of the four available.
+    Both prefixes clear Claude's 1,024-token minimum, which is the reason the
+    system prompt does not get a breakpoint of its own. On its own the system
+    prompt and the tool definitions come to about 390 tokens, under the
+    minimum, so a breakpoint on the instructions would mark a boundary the
+    provider declines to cache - a wasted breakpoint of the four available.
+
+    The figures above were measured on Claude, called directly. Every call now
+    goes through OpenRouter, and pydantic-ai's OpenRouter model forwards a
+    `CachePoint` as a `cache_control` breakpoint only when the downstream
+    provider honours one - Anthropic does - and drops it silently otherwise.
+    The default GLM Flash caches nothing on a breakpoint and costs a fraction
+    of what made the breakpoints worth placing; they stay because they are
+    free where they do nothing and a real saving where they do.
     """
     listing_block = f"{LISTING_HEADING}\n\n{facts_block(listing)}\n"
     if reading is not None:
@@ -359,8 +367,9 @@ async def grade_listing(
 
     THE FIRST CALL GOES ALONE, AND THAT IS THE WHOLE POINT. Every model call
     about one Listing sends the same ~4,000-token prefix - the brief, then the
-    Listing - and `build_criterion_prompt` marks it cacheable. But Anthropic's
-    cache entry does not exist until the first response begins: "If you need
+    Listing - and `build_criterion_prompt` marks it cacheable. But a prefix
+    cache entry does not exist until the first response begins. Anthropic's
+    docs say it outright, and it was the backend when this was measured: "If you need
     cache hits for parallel requests, wait for the first response before
     sending subsequent requests." Firing all seven together means seven misses,
     seven writes, and seven times the 1.25x write premium - measured at 23%
@@ -372,7 +381,9 @@ async def grade_listing(
     paid once, and the thing it buys is the entire saving. Anyone tempted to
     put the plain `gather` back should first check what the graders are
     actually spending: `cache_read_input_tokens` at zero is what this looked
-    like before.
+    like before. On a backend that caches nothing, the default GLM Flash among
+    them, the warm call costs one call's latency and saves nothing, which is a
+    price worth paying to keep the arrangement right for the backends that do.
 
     The warm call is the first Criterion the model always grades - `is_model`,
     not `fallback: model`, because a fallback resolves deterministically often

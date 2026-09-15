@@ -38,7 +38,7 @@ PNG_BYTES = (
 
 def settings_for() -> Settings:
     settings = Settings()
-    settings.evaluation.vision_model = "anthropic:claude-sonnet-5"
+    settings.evaluation.vision_model = "openrouter:z-ai/glm-5.3-flash"
     return settings
 
 

@@ -16,12 +16,16 @@ Python 3.14 and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 uv sync
-cp .env.example .env    # then put your ANTHROPIC_API_KEY in it
+cp .env.example .env    # then put your OPENROUTER_API_KEY in it
 ```
 
-You need your own [Anthropic API key](https://console.anthropic.com/); every
-model call is billed to it. A `check` on one listing costs about 7 cents on
-Sonnet 5.
+You need your own [OpenRouter API key](https://openrouter.ai/keys); every
+model call goes through OpenRouter and is billed to it. The two model slugs
+in `.env`, `OPENROUTER_TEXT_MODEL` for the graders and `OPENROUTER_IMAGE_MODEL`
+for the EPC and floorplan reads, default to `z-ai/glm-5.3-flash`, on which a
+`check` on one listing costs well under a cent. Any slug from
+[openrouter.ai/models](https://openrouter.ai/models) works; the image model
+has to accept image input.
 
 `data/` holds the database and the cached listing images and is not in the
 repository. If you were handed a workshop package, copy its `data/` directory

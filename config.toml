@@ -8,9 +8,9 @@ exclude_ground_floor = false
 postcodes = []                 # empty means any postcode
 
 [evaluation]
-model = "anthropic:claude-sonnet-5"
-# Reads the EPC graph and the floorplan. Empty means "same as model".
-vision_model = ""
+# The models are not here. OPENROUTER_TEXT_MODEL and OPENROUTER_IMAGE_MODEL in
+# `.env` name them, beside the key that pays for them - see `.env.example`.
+
 # A Listing whose Score reaches this, with Coverage at or above coverage_floor,
 # gets a hopeful Verdict. Set it from the histogram `flat-scout report` prints
 # once the corpus is graded, not from a guess.

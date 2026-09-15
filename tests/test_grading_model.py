@@ -119,7 +119,7 @@ def four_model_criteria() -> list[Criterion]:
 async def test_the_first_model_call_finishes_before_the_others_begin():
     """The whole saving depends on this and nothing else.
 
-    Anthropic's cache entry does not exist until the first response begins, so
+    A prefix cache entry does not exist until the first response begins, so
     seven calls fired together all miss and all pay the 1.25x write premium -
     the change costs 23% more than no caching at all. One call has to land
     first for the other six to have something to read.

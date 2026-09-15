@@ -15,11 +15,28 @@ class Filters(BaseModel):
     postcodes: list[str] = Field(default_factory=list)
 
 
+# Every model call goes through OpenRouter, and this is the prefix pydantic-ai
+# resolves to its OpenRouter model. The slug after it is OpenRouter's own.
+OPENROUTER_PREFIX = "openrouter:"
+# Cheap, accepts images, so one slug serves the graders and the vision reads
+# alike until there is a reason for two.
+DEFAULT_MODEL_SLUG = "z-ai/glm-5.3-flash"
+
+
+def openrouter_model(slug: str) -> str:
+    """The pydantic-ai name for an OpenRouter slug such as `z-ai/glm-5.3-flash`."""
+    return slug if slug.startswith(OPENROUTER_PREFIX) else f"{OPENROUTER_PREFIX}{slug}"
+
+
 class EvaluationConfig(BaseModel):
-    model: str = "anthropic:claude-sonnet-5"
+    # Set from OPENROUTER_TEXT_MODEL in `.env`, not from `config.toml`: the
+    # model is chosen alongside the key that pays for it, and one place for
+    # the choice is one fewer to get out of step.
+    model: str = openrouter_model(DEFAULT_MODEL_SLUG)
     # Reading a band off a graph is a different job from weighing a brief, and
-    # may deserve a different model. Left empty it follows `model`, so there is
-    # one knob to turn until there is a reason for two.
+    # may deserve a different model. Set from OPENROUTER_IMAGE_MODEL; left
+    # empty it follows `model`, so there is one knob to turn until there is a
+    # reason for two.
     vision_model: str = ""
     hopeful_threshold: float = 6.5
     criteria_path: str = "criteria/criteria.md"
@@ -96,7 +113,9 @@ class Features(BaseModel):
 
 
 class Secrets(BaseModel):
-    anthropic_api_key: str = ""
+    # pydantic-ai's OpenRouter provider reads it from the environment itself;
+    # it is carried here so every secret the app knows about is in one place.
+    openrouter_api_key: str = ""
     # The switch for logfire, and the only one. Absent means nothing is
     # exported and nothing is configured - see `observe.py`.
     logfire_token: str = ""
@@ -114,7 +133,14 @@ def load_settings(config_path: Path = Path("config.toml")) -> Settings:
     raw = tomllib.loads(config_path.read_text())
     load_dotenv()
     secrets = Secrets(
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY", ""),
         logfire_token=os.getenv("LOGFIRE_TOKEN", ""),
     )
-    return Settings(**raw, secrets=secrets)
+    evaluation = dict(raw.pop("evaluation", {}))
+    # Empty counts as unset: the test suite pins these blank so a developer's
+    # own `.env` cannot leak into an assertion about the default.
+    if text_slug := os.getenv("OPENROUTER_TEXT_MODEL", ""):
+        evaluation["model"] = openrouter_model(text_slug)
+    if image_slug := os.getenv("OPENROUTER_IMAGE_MODEL", ""):
+        evaluation["vision_model"] = openrouter_model(image_slug)
+    return Settings(**raw, evaluation=evaluation, secrets=secrets)

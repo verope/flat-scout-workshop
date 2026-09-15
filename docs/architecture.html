@@ -959,8 +959,8 @@ tool. Each was learned from a wrong answer that nobody downstream could have cau
   <thead><tr><th>Path</th><th>What it holds</th><th>In git?</th></tr></thead>
   <tbody>
     <tr><td><code>criteria/*.md</code></td><td>The brief, one Criterion per file. <code>_brief.md</code> and <code>_fields.md</code> are the shared preamble; <code>criteria.md</code> is the naive baseline&#8217;s single document; <code>retired/</code> is where a Criterion goes to stop counting</td><td class="num">yes</td></tr>
-    <tr><td><code>config.toml</code></td><td>Hard filters, the two thresholds, the models, the feature flags</td><td class="num">yes</td></tr>
-    <tr><td><code>.env</code></td><td><code>ANTHROPIC_API_KEY</code>, and optionally a <code>LOGFIRE_TOKEN</code></td><td class="num">no</td></tr>
+    <tr><td><code>config.toml</code></td><td>Hard filters, the two thresholds, the feature flags</td><td class="num">yes</td></tr>
+    <tr><td><code>.env</code></td><td><code>OPENROUTER_API_KEY</code>, the two model slugs <code>OPENROUTER_TEXT_MODEL</code> and <code>OPENROUTER_IMAGE_MODEL</code>, and optionally a <code>LOGFIRE_TOKEN</code></td><td class="num">no</td></tr>
     <tr><td><code>data/flats.db</code></td><td>SQLite. <code>listings</code> is one row per (portal, id) with the fetched fields, the image reading, the Score and Verdict and the status. <code>criterion_grades</code> is one row per Listing and Criterion, with the evidence and the rubric hash. <code>events</code> is an append-only log of everything that happened to a row. <code>measure_runs</code> and <code>posterior_fit</code> serve <code>grade --measure</code> and <code>fit</code></td><td class="num">no</td></tr>
     <tr><td><code>data/images/</code></td><td>One directory per Listing holding its photo, floorplan and EPC as <code>check</code> downloaded them. The vision reading and <code>annotate --db</code> read these before touching a URL</td><td class="num">no</td></tr>
     <tr><td><code>tests/fixtures/floorplans/</code></td><td>The floorplan corpus and <code>annotations.toml</code>, the human ground truth</td><td class="num">yes</td></tr>

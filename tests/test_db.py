@@ -159,7 +159,7 @@ def test_an_image_reading_round_trips(tmp_path):
             desk_space=False,
             bedroom_has_window=True,
         ),
-        model="anthropic:claude-sonnet-5",
+        model="openrouter:z-ai/glm-5.3-flash",
     )
     row = db.get(listing_id)
     assert row["bedroom_has_window"] == 1
@@ -168,7 +168,7 @@ def test_an_image_reading_round_trips(tmp_path):
     assert json.loads(row["layout_notes"]) == ["reception 4.2m x 3.6m"]
     assert row["reception_is_separate"] == 1
     assert row["desk_space"] == 0
-    assert row["vision_model"] == "anthropic:claude-sonnet-5"
+    assert row["vision_model"] == "openrouter:z-ai/glm-5.3-flash"
     assert row["images_read_at"]
 
 
@@ -183,7 +183,7 @@ def test_a_certificate_reading_round_trips(tmp_path):
             epc_floor_area_sqm=51.0,
             epc_property_type="Mid-floor flat",
         ),
-        model="anthropic:claude-sonnet-5",
+        model="openrouter:z-ai/glm-5.3-flash",
     )
     row = db.get(listing_id)
     assert row["epc_band"] == "B"
@@ -218,7 +218,7 @@ def test_an_unreadable_reading_is_still_recorded_as_having_been_read(tmp_path):
     """images_read_at is what stops a retry paying for the same images twice."""
     db = Database(tmp_path / "flats.db")
     listing_id = db.upsert(make_listing(), source="manual")
-    db.set_image_reading(listing_id, ImageReading(), model="anthropic:claude-sonnet-5")
+    db.set_image_reading(listing_id, ImageReading(), model="openrouter:z-ai/glm-5.3-flash")
     row = db.get(listing_id)
     assert row["epc_band"] is None
     assert row["reception_is_separate"] is None

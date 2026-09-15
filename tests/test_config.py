@@ -55,19 +55,40 @@ def test_shipped_config_vision_model_is_known_to_pydantic_ai():
     assert error is None or "Unknown model" not in error
 
 
-def test_the_vision_model_follows_the_evaluator_unless_it_is_set(tmp_path: Path):
-    """One knob until there is a reason for two."""
-    assert EvaluationConfig().vision_model == EvaluationConfig().model
-    assert EvaluationConfig(model="anthropic:claude-opus-5").vision_model == (
-        "anthropic:claude-opus-5"
-    )
-    (tmp_path / "config.toml").write_text(
-        '[evaluation]\nmodel = "anthropic:claude-opus-5"\n'
-        'vision_model = "anthropic:claude-haiku-4-5"\n'
-    )
+def test_the_default_model_is_glm_flash_on_openrouter():
+    """Cheap, takes images, and one slug serves both jobs."""
+    assert EvaluationConfig().model == "openrouter:z-ai/glm-5.3-flash"
+    assert EvaluationConfig().vision_model == "openrouter:z-ai/glm-5.3-flash"
+
+
+def test_the_text_model_comes_from_the_environment(tmp_path: Path, monkeypatch):
+    """`.env` holds the bare OpenRouter slug; the loader qualifies it."""
+    (tmp_path / "config.toml").write_text("[filters]\nmax_price_pcm = 3000\n")
+    monkeypatch.setenv("OPENROUTER_TEXT_MODEL", "anthropic/claude-sonnet-5")
     settings = load_settings(tmp_path / "config.toml")
-    assert settings.evaluation.vision_model == "anthropic:claude-haiku-4-5"
-    assert settings.evaluation.model == "anthropic:claude-opus-5"
+    assert settings.evaluation.model == "openrouter:anthropic/claude-sonnet-5"
+
+
+def test_the_vision_model_follows_the_text_model_unless_it_is_set(
+    tmp_path: Path, monkeypatch
+):
+    """One knob until there is a reason for two."""
+    (tmp_path / "config.toml").write_text("[filters]\nmax_price_pcm = 3000\n")
+    monkeypatch.setenv("OPENROUTER_TEXT_MODEL", "anthropic/claude-opus-5")
+    settings = load_settings(tmp_path / "config.toml")
+    assert settings.evaluation.vision_model == "openrouter:anthropic/claude-opus-5"
+
+    monkeypatch.setenv("OPENROUTER_IMAGE_MODEL", "google/gemini-3-flash")
+    settings = load_settings(tmp_path / "config.toml")
+    assert settings.evaluation.vision_model == "openrouter:google/gemini-3-flash"
+    assert settings.evaluation.model == "openrouter:anthropic/claude-opus-5"
+
+
+def test_the_openrouter_key_is_read_into_secrets(tmp_path: Path, monkeypatch):
+    (tmp_path / "config.toml").write_text("[filters]\nmax_price_pcm = 3000\n")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-v1-test")
+    settings = load_settings(tmp_path / "config.toml")
+    assert settings.secrets.openrouter_api_key == "sk-or-v1-test"
 
 
 def test_image_signals_is_on_by_default_and_can_be_switched_off(tmp_path: Path):

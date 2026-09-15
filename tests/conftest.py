@@ -10,7 +10,7 @@ this one.
 The second guard is the secrets. `load_settings` reads `.env`, and observability
 is switched on by the token alone, so one test that runs a CLI command with a
 real `.env` present configured logfire for the whole process and exported every
-later test's spans to a real project. Both variables are pinned empty here;
+later test's spans to a real project. All of them are pinned empty here;
 `load_dotenv` never overrides a variable that is already set.
 """
 
@@ -28,6 +28,10 @@ def _cache_images_outside_the_repository(tmp_path, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _no_real_secrets(monkeypatch):
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "")
+    # The model slugs too: a developer's `.env` may name a different model,
+    # and a test asserting the default must not read theirs.
+    monkeypatch.setenv("OPENROUTER_TEXT_MODEL", "")
+    monkeypatch.setenv("OPENROUTER_IMAGE_MODEL", "")
     monkeypatch.setenv("LOGFIRE_TOKEN", "")
     monkeypatch.setenv("LOGFIRE_SEND_TO_LOGFIRE", "false")

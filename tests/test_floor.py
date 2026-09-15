@@ -92,7 +92,7 @@ async def test_a_floor_claimed_with_no_plan_to_read_it_from_is_discarded():
     invented - and an invented "Ground Floor" removes the flat outright.
     """
     settings = Settings()
-    settings.evaluation.vision_model = "anthropic:claude-sonnet-5"
+    settings.evaluation.vision_model = "openrouter:z-ai/glm-5.3-flash"
     respx.get("https://media.example.com/epc.png").mock(
         return_value=httpx.Response(200, content=PNG, headers={"content-type": "image/png"})
     )

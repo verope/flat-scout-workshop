@@ -348,7 +348,7 @@ async def test_the_band_read_off_the_graph_is_stored_and_reaches_the_evaluator(t
     row = db.get(listing_id)
     assert row["epc_band"] == "C"
     assert row["images_read_at"]
-    assert row["vision_model"] == "anthropic:claude-sonnet-5"
+    assert row["vision_model"] == "openrouter:z-ai/glm-5.3-flash"
     assert row["status"] == "evaluated"
     assert "epc_band: C" in prompts[0]
 

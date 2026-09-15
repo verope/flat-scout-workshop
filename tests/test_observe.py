@@ -368,7 +368,7 @@ async def test_a_provider_credential_never_reaches_an_exported_span():
 def test_turning_it_on_does_not_instrument_every_httpx_client():
     """A global hook traces every client in the process, not only ours.
 
-    Anthropic's transport is the case that matters: the pydantic-ai span
+    OpenRouter's transport is the case that matters: the pydantic-ai span
     already carries the tokens and the latency, so a second HTTP span inside
     every one of them is a duplicate.
     """

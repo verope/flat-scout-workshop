@@ -780,7 +780,7 @@ async def measure_criteria(
                     # the reason `grade_listing` does the same: all `runs`
                     # prompts here are byte-identical, which makes this the
                     # strongest cache prefix in the codebase and the worst
-                    # thing to fire all at once. Anthropic's cache entry does
+                    # thing to fire all at once. A prefix cache entry does
                     # not exist until the first response begins, so a plain
                     # gather would make every replicate a write at 1.25x and
                     # none of them a read.

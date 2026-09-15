@@ -139,7 +139,7 @@ def configure_observability(settings, *, service: str, module: Any = None) -> bo
     # NOT `instrument_httpx()`. Unscoped, it hooks every client in the
     # process, and one of them is not ours: pydantic-ai's own span already
     # carries a model call's tokens, latency and retries, so tracing
-    # Anthropic's transport underneath it adds a duplicate child to the very
+    # OpenRouter's transport underneath it adds a duplicate child to the very
     # thing being looked at.
     #
     # The Portal downloads are still worth a span - a slow or 403-ing fetch

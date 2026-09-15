@@ -46,7 +46,7 @@ def evaluated(
     db.set_evaluation(
         listing_id,
         Evaluation(verdict=verdict, score=score, reasons=["as it stood"]),
-        "anthropic:claude-sonnet-5",
+        "openrouter:z-ai/glm-5.3-flash",
     )
     db.transition(listing_id, "evaluated")
     return listing_id
@@ -109,7 +109,7 @@ async def test_rescore_reuses_the_stored_image_reading(tmp_path):
     db.set_image_reading(
         listing_id,
         ImageReading(epc_band="C", epc_band_source="graph", layout_verdict="good"),
-        "anthropic:claude-sonnet-5",
+        "openrouter:z-ai/glm-5.3-flash",
     )
     import flat_scout.pipeline as pipeline
 
