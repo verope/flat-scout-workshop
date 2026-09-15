@@ -53,7 +53,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, BinaryContent
 
 from flat_scout.backoff import with_backoff
-from flat_scout.config import Settings
+from flat_scout.config import MODEL_SETTINGS, Settings
 from flat_scout.compass import (
     Bearing,
     outward_bearing,
@@ -450,6 +450,7 @@ async def _read_aspect(
         output_type=_AspectRead,
         system_prompt="You read floorplans and report only what is drawn on them.",
         name="floorplan-aspect",
+        model_settings=MODEL_SETTINGS,
     )
     try:
         result = await with_backoff(lambda: agent.run([ASPECT_PROMPT, plan]))
@@ -757,6 +758,7 @@ async def read_images(
         output_type=ImageReading,
         system_prompt=SYSTEM_PROMPT,
         name="epc-and-floorplan",
+        model_settings=MODEL_SETTINGS,
     )
     with span(
         "read images",

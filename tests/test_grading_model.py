@@ -355,3 +355,38 @@ async def test_a_rate_limited_grade_is_asked_again_rather_than_lost(monkeypatch)
     )
     assert grade.value == 7.0
     assert grade.determined is True
+
+
+def test_the_grade_field_must_be_sent_even_when_it_is_null():
+    """An omitted field and a null are the same to pydantic, and were the
+    same to the corpus: GLM Flash reasoned "Grade 10" and sent a tool call
+    without a `grade` at all, and 162 of 165 pets grades came back unknown.
+    Required-but-nullable makes the model say null on purpose."""
+    from flat_scout.grading import ModelGrade
+
+    assert "grade" in ModelGrade.model_json_schema()["required"]
+    assert ModelGrade(grade=None, evidence="says nothing").grade is None
+
+
+@pytest.mark.asyncio
+async def test_every_model_call_carries_a_request_timeout(monkeypatch):
+    """The OpenAI client's default is ten minutes. Two Listings of the first
+    corpus run sat on a hung connection for exactly that, and a live `check`
+    on stage cannot. `MODEL_SETTINGS` is what every Agent in the app is
+    built with; this pins the grader to it and the timeout to a bound."""
+    from flat_scout import grading
+
+    built: list[dict] = []
+    real_agent = grading.Agent
+
+    def spy(*args, **kwargs):
+        built.append(kwargs)
+        return real_agent(*args, **kwargs)
+
+    monkeypatch.setattr(grading, "Agent", spy)
+    await grade_one(
+        a_criterion("m", {"model": True}), a_listing(), None, Settings(), PREAMBLE,
+        model=TestModel(custom_output_args={"grade": 7.0, "evidence": "fine"}),
+    )
+    assert built[0]["model_settings"] is grading.MODEL_SETTINGS
+    assert 0 < grading.MODEL_SETTINGS["timeout"] <= 300

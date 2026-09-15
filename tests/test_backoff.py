@@ -99,3 +99,15 @@ async def test_retry_after_is_still_capped():
     sleeps = Sleeps()
     await with_backoff(call, sleep=sleeps, rng=lambda: 0.0, cap=30.0)
     assert sleeps.delays == [30.0]
+
+
+@pytest.mark.asyncio
+async def test_a_timeout_or_connection_failure_is_retried():
+    """pydantic-ai wraps a timeout or a refused connection as a bare
+    `ModelAPIError`, not the HTTP subclass, and the corpus run's last two
+    Listings sat on one for ten minutes with nothing asking again."""
+    from pydantic_ai.exceptions import ModelAPIError
+
+    call, calls = failing_then(1, ModelAPIError(model_name="m", message="Request timed out."))
+    assert await with_backoff(call, sleep=Sleeps(), rng=lambda: 0.0) == "ok"
+    assert calls["n"] == 2

@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, CachePoint
 
 from flat_scout.adjudicate import Grade
-from flat_scout.config import Settings
+from flat_scout.config import MODEL_SETTINGS, Settings
 from flat_scout.criteria import Criterion
 from flat_scout.evaluate import IMAGE_HEADING, LISTING_HEADING, facts_block
 from flat_scout.backoff import with_backoff
@@ -187,7 +187,13 @@ class ModelGrade(BaseModel):
 
     # Nullable on purpose. Without it the model must invent a number, and an
     # invented number is indistinguishable from a read one.
-    grade: float | None = Field(default=None, ge=0, le=10)
+    #
+    # Nullable but NOT defaulted. With `default=None` an omitted field and a
+    # deliberate null are the same thing, and GLM Flash omits every field it
+    # is not required to send: it reasoned "Grade 10" and returned a tool call
+    # with no `grade` in it, on 162 of 165 pets grades. Required, the schema
+    # makes it say null on purpose.
+    grade: float | None = Field(ge=0, le=10)
     evidence: str
     concern: str | None = None
     question: str | None = None
@@ -275,6 +281,7 @@ async def by_model(
         output_type=ModelGrade,
         system_prompt=CRITERION_SYSTEM_PROMPT,
         name="criterion-grader",
+        model_settings=MODEL_SETTINGS,
     )
     prompt = build_criterion_prompt(criterion, listing, reading, preamble)
     try:

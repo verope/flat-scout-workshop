@@ -23,6 +23,15 @@ OPENROUTER_PREFIX = "openrouter:"
 DEFAULT_MODEL_SLUG = "z-ai/glm-5.3-flash"
 
 
+# Handed to every Agent the app builds. The OpenAI client underneath the
+# OpenRouter model waits ten minutes for a response by default, and a hung
+# connection held two Listings of a corpus run for exactly that. A grader
+# call on the default model takes under a minute with its reasoning on, so
+# three minutes is generous, and a call that is not back by then is retried
+# by `backoff.with_backoff` rather than waited for.
+MODEL_SETTINGS: dict = {"timeout": 180}
+
+
 def openrouter_model(slug: str) -> str:
     """The pydantic-ai name for an OpenRouter slug such as `z-ai/glm-5.3-flash`."""
     return slug if slug.startswith(OPENROUTER_PREFIX) else f"{OPENROUTER_PREFIX}{slug}"

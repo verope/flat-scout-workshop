@@ -23,7 +23,7 @@ from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 import httpx
-from pydantic_ai.exceptions import ModelHTTPError
+from pydantic_ai.exceptions import ModelAPIError, ModelHTTPError
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +42,11 @@ _rng = random.random
 def retryable(exc: BaseException) -> bool:
     if isinstance(exc, ModelHTTPError):
         return exc.status_code in RETRYABLE_STATUSES
+    if isinstance(exc, ModelAPIError):
+        # The provider never answered: a timeout, a refused or dropped
+        # connection. pydantic-ai raises the bare class for those and the
+        # HTTP subclass above for anything that came back with a status.
+        return True
     return isinstance(exc, (httpx.TransportError, asyncio.TimeoutError))
 
 

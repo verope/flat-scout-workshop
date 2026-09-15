@@ -12,7 +12,7 @@ from dataclasses import asdict
 from pydantic_ai import Agent
 
 from flat_scout.backoff import with_backoff
-from flat_scout.config import Filters, Settings
+from flat_scout.config import MODEL_SETTINGS, Filters, Settings
 from flat_scout.models import Evaluation, ImageReading, ListingData, ModelVerdict
 from flat_scout.observe import span
 from flat_scout.vision import render_reading
@@ -140,6 +140,7 @@ async def evaluate_listing(
         output_type=ModelVerdict,
         system_prompt=SYSTEM_PROMPT,
         name="holistic-evaluator",
+        model_settings=MODEL_SETTINGS,
     )
     with span(
         "evaluate listing",
