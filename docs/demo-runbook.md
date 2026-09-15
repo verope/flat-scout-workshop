@@ -27,7 +27,7 @@ Two things a sharp audience will ask about:
 
 ```sh
 uv sync
-uv run flat-scout status          # expect: new 3, evaluated 164
+uv run flat-scout status          # expect: new 3, evaluated 154, approved 5, rejected 5
 cat .env                          # OPENROUTER_API_KEY set, models as shipped
 ```
 
@@ -39,7 +39,9 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
    ```
 2. **The naive evaluator.** Pet friendly, with a floorplan and an EPC. The
    whole brief goes to the model once and one score comes back. The vision
-   reading is already stored, so this is one text call. About half a minute.
+   reading is already stored, so this is one text call. It takes about a
+   minute and a half: one large prompt the model reasons over at length.
+   Narrate the brief while it runs.
    ```sh
    uv run flat-scout check --holistic https://www.rightmove.co.uk/properties/91601766
    ```
@@ -47,7 +49,7 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
    Note there is no `coverage`: one number, and nothing to say how much of
    the brief it rests on.
 3. **The same flat, one Criterion at a time.** `--force` because the listing
-   now has a Verdict. About a minute.
+   now has a Verdict. About half a minute: the calls run in parallel.
    ```sh
    uv run flat-scout check --weighted --force https://www.rightmove.co.uk/properties/91601766
    ```
@@ -56,7 +58,7 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
    one entry per Criterion with its grade, its weight and what the grade
    was read off. A `grade` of null is unknown, and unknown is a real answer.
 4. **A veto.** The advert says "Pets Not Allowed". The Criterion fires its
-   veto and the Verdict is reject whatever the Score. About a minute.
+   veto and the Verdict is reject whatever the Score. About half a minute.
    ```sh
    uv run flat-scout check https://www.rightmove.co.uk/properties/92077104
    ```
@@ -111,7 +113,8 @@ If short of time, drop step 10 first, then step 8.
 
 ## Attendees afterwards
 
-The graded `data/` is attached to the GitHub release as `data.zip`. Unzip it
-into the repository root, put an OpenRouter key in `.env`, and every command
-above works. `report` and `report --weights` cost nothing; `check` on a new
+The graded `data/` is `data.zip` on the GitHub release
+<https://github.com/verope/flat-scout-workshop/releases/tag/workshop-data>.
+Unzip it into the repository root, put an OpenRouter key in `.env`, and every
+command above works. `report` and `report --weights` cost nothing; `check` on a new
 URL costs well under a cent on the default model.

@@ -47,13 +47,13 @@ $ uv run flat-scout check --holistic https://www.rightmove.co.uk/properties/9209
   "north_source": null,
   "images_read_at": "2026-08-17T21:25:19.714996+00:00",
   "vision_model": "anthropic:claude-sonnet-5",
-  "verdict": "hopeful",
-  "score": 6.5,
+  "verdict": "borderline",
+  "score": 4.5,
   "coverage": 0.0,
-  "reasons": "[\"Advert states pet-friendly development\", \"Battersea Park and riverside walks close by\", \"Large open-plan living space, roughly 36 m\\u00b2\"]",
-  "red_flags": "[\"Floorplan shows the bedroom with no external window\", \"531 sqft \\u2248 49.3 m\\u00b2, just under the 50 m\\u00b2 floor\", \"Compass direction of the windows not stated anywhere\", \"Portal field says unfurnished, advert text says fully furnished\", \"Advert restricted to 'working professionals only'\"]",
-  "agent_questions": "[\"Could you confirm that this particular apartment's tenancy allows a dog, and whether there are any breed, size or additional-deposit conditions?\", \"Which compass direction do the living room and bedroom windows face?\", \"What flooring runs through the living areas and the bedroom?\", \"Which floor is the apartment on, and is there a lift?\", \"The floorplan on the listing appears to show the bedroom without an external window \\u2014 is that correct?\"]",
-  "evaluated_at": "2026-09-15T05:47:34.357517+00:00",
+  "reasons": "[\"pet-friendly development stated\", \"Battersea Park a short walk away\", \"just under the 50 m\\u00b2 floor at ~49 m\\u00b2\"]",
+  "red_flags": "[\"Floorplan shows no external window in the bedroom\", \"531 sqft is ~49.3 m\\u00b2, narrowly under their 50 m\\u00b2 floor\", \"Window aspect unstated, so west-facing cannot be ruled out\", \"Apartment floor and lift not stated\", \"Living-area flooring unknown from advert or plan\"]",
+  "agent_questions": "[\"Iris and Sam would like to know which floor this apartment is on, and whether there is a lift in the building.\", \"Could you tell us which direction the living area windows face (e.g. north, south, east, west)?\", \"Does the bedroom have a window to the outside, or is it an internal room?\", \"What is the flooring in the living area \\u2014 wood, tile, vinyl or carpet?\", \"The development is described as pet-friendly \\u2014 can you confirm this particular apartment and landlord will accept a dog, and whether there is a pet deposit or pet rent?\", \"Does this particular unit have a private balcony?\"]",
+  "evaluated_at": "2026-09-15T05:54:58.522684+00:00",
   "model": "openrouter:z-ai/glm-5.3-flash",
   "evaluation_mode": "holistic",
   "status": "evaluated",
@@ -64,4 +64,4 @@ $ uv run flat-scout check --holistic https://www.rightmove.co.uk/properties/9209
   "p_hopeful": null,
   "posterior_fit_hash": null
 }
-uv run flat-scout check --holistic "$URL" 2>&1  1.76s user 0.35s system 2% cpu 1:34.01 total
+uv run flat-scout check --holistic "$URL" 2>&1  1.67s user 0.32s system 2% cpu 1:37.16 total

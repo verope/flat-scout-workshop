@@ -24,3 +24,31 @@ $ uv run flat-scout benchmark
 07:49:52 INFO    flat_scout.observe | reading floorplans: 22/24 (91%), ~30s left
 07:50:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~15s left
 07:50:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~16s left
+07:51:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~18s left
+07:51:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~19s left
+07:52:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~20s left
+07:52:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~22s left
+07:53:01 INFO    flat_scout.vision | compass not confirmed by a second box: 227 then 313
+07:53:01 INFO    flat_scout.observe | reading floorplans: done, 24 in 8m39s
+Scored against the annotations, not against a second run.
+
+  north          14/18 right   4 wrong   0 abstained   6 correctly silent
+  window walls   22/24 right   2 wrong   0 abstained   0 correctly silent
+  aspects         6/17 right   5 wrong   6 abstained   7 correctly silent
+
+  6 of 17 plans got at least one aspect right, against the stricter count above, which requires every aspect named to be real.
+
+  22 of 41 real glazed walls were found across the corpus.
+
+Where it went wrong
+    160824506  north        said 318        truth 230            via position
+    92082768  north        said 270        truth none           via -
+    92094612  north        said 30         truth 211            via position
+    92098377  north        said 256        truth 51             via letter-and-position
+    92094612  window walls said 0          truth 271/91         via position
+    92096835  window walls said 90         truth 270            via position
+    160824506  aspects      said NW         truth NE/SE          via position
+    91941729  aspects      said SE         truth E              via position (upright N)
+    92094612  aspects      said NW         truth NE/SW          via position
+    92096835  aspects      said SW         truth NE             via position
+    92098377  aspects      said N          truth SW             via letter-and-position

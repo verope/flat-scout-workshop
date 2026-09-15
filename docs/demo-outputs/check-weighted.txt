@@ -48,12 +48,12 @@ $ uv run flat-scout check --weighted --force https://www.rightmove.co.uk/propert
   "images_read_at": "2026-08-17T21:25:19.714996+00:00",
   "vision_model": "anthropic:claude-sonnet-5",
   "verdict": "borderline",
-  "score": 4.181818181818182,
-  "coverage": 0.6363636363636364,
-  "reasons": "[\"Description states \\\"Pet-friendly development\\\" / \\\"petfriendly living\\\" with no cost or conditions attached.\"]",
-  "red_flags": "[\"The Portal's furnished field says Unfurnished while the advert's prose repeatedly claims \\\"Fully furnished apartments\\\" \\u2014 a direct contradiction someone will need to resolve before viewing.\", \"49 m\\u00b2, from the listing.\"]",
-  "agent_questions": "[\"Which way do the main living-room windows face?\", \"What is the flooring in the living room and the hallway?\", \"Could you tell us which floor this apartment is on, and whether the building has a lift?\", \"Can you confirm there is no pet deposit or rent uplift for a dog arriving in spring?\"]",
-  "evaluated_at": "2026-09-15T05:50:15.949569+00:00",
+  "score": 4.6,
+  "coverage": 0.6,
+  "reasons": "[\"Description explicitly states \\\"Pet-friendly development\\\" with no conditions or added costs mentioned.\"]",
+  "red_flags": "[\"49 m\\u00b2, from the listing.\"]",
+  "agent_questions": "[\"Which way do the main living-room windows face?\", \"What is the flooring in the living room and the hallway?\", \"Which floor is the flat on, and is there a lift?\", \"Can you confirm the tenancy for this specific flat allows a dog from the start, with no pet rent, deposit or breed/size restrictions?\"]",
+  "evaluated_at": "2026-09-15T05:55:21.601497+00:00",
   "model": "openrouter:z-ai/glm-5.3-flash",
   "evaluation_mode": "weighted",
   "status": "evaluated",
@@ -62,18 +62,63 @@ $ uv run flat-scout check --weighted --force https://www.rightmove.co.uk/propert
   "score_low": null,
   "score_high": null,
   "p_hopeful": null,
-  "posterior_fit_hash": null
+  "posterior_fit_hash": null,
+  "grades": [
+    {
+      "criterion": "aspect",
+      "name": "An aspect other than west",
+      "weight": 2.0,
+      "grade": null,
+      "determined": false,
+      "evidence": "Neither the extracted fields nor the advert's description states which way the windows face; only the presence of \"private balconies\" is mentioned, which is not an aspect.",
+      "graded_by": "model:openrouter:z-ai/glm-5.3-flash",
+      "concern": null,
+      "question": null
+    },
+    {
+      "criterion": "floor-area",
+      "name": "At least 50 m\u00b2",
+      "weight": 3.0,
+      "grade": 0.0,
+      "determined": true,
+      "evidence": "49 m\u00b2, from the listing.",
+      "graded_by": "floor_area",
+      "concern": null,
+      "question": null
+    },
+    {
+      "criterion": "hard-floors",
+      "name": "Hard floors through the living areas",
+      "weight": 1.0,
+      "grade": null,
+      "determined": false,
+      "evidence": "Neither the description nor the key features mentions any flooring material, so the flooring is unstated rather than bad.",
+      "graded_by": "model:openrouter:z-ai/glm-5.3-flash",
+      "concern": null,
+      "question": null
+    },
+    {
+      "criterion": "lift",
+      "name": "A lift above the second floor",
+      "weight": 1.0,
+      "grade": null,
+      "determined": false,
+      "evidence": "The floor is never stated \u2014 no floor field, no floorplan title block, and the description is silent \u2014 so the criterion cannot be answered even though the building may have a lift (concierge/amenities are mentioned but a lift is not).",
+      "graded_by": "model:openrouter:z-ai/glm-5.3-flash",
+      "concern": null,
+      "question": null
+    },
+    {
+      "criterion": "pets",
+      "name": "A tenancy that accepts a dog",
+      "weight": 3.0,
+      "grade": 10.0,
+      "determined": true,
+      "evidence": "Description explicitly states \"Pet-friendly development\" with no conditions or added costs mentioned.",
+      "graded_by": "model:openrouter:z-ai/glm-5.3-flash",
+      "concern": null,
+      "question": "Can you confirm the tenancy for this specific flat allows a dog from the start, with no pet rent, deposit or breed/size restrictions?"
+    }
+  ]
 }
-
-Grades
-     ?  w2  An aspect other than west
-             Neither window_aspects nor the advert prose states any compass aspect; the balcony on the plan is not a permitted source.
-   0.0  w4  At least 50 m²
-             49 m², from the listing.
-     ?  w1  Hard floors through the living areas
-             Neither the description nor the key features states any flooring material, so the living-area floors are unknown.
-     ?  w1  A lift above the second floor
-             Nothing in the listing states which floor this flat is on — the description never says "set on the Xth floor", there is no floor field or floorplan title block, and the long amenities list (gym, cinema, concierge, bike storage and so on) never mentions a lift either — so with the floor unknown the rubric requires null.
-  10.0  w3  A tenancy that accepts a dog
-             Description states "Pet-friendly development" / "petfriendly living" with no cost or conditions attached.
-uv run flat-scout check --weighted --force "$URL" 2>&1  1.79s user 0.36s system 1% cpu 2:41.74 total
+uv run flat-scout check --weighted --force "$URL" 2>&1  1.70s user 0.27s system 8% cpu 23.081 total
