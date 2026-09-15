@@ -1,0 +1,26 @@
+$ uv run flat-scout benchmark
+07:44:22 INFO    flat_scout.observe | reading floorplans: 24 to do
+07:44:52 INFO    flat_scout.observe | reading floorplans: 0/24 (0%), 30s elapsed
+07:45:22 INFO    flat_scout.observe | reading floorplans: 4/24 (16%), ~5m00s left
+07:45:38 INFO    flat_scout.vision | north measured 216 by position, but read as 345
+07:45:44 INFO    flat_scout.vision | compass not confirmed by a second box: 202 then nothing
+07:45:46 INFO    flat_scout.vision | north measured 318 by position, but read as 225
+07:45:48 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+07:45:50 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+07:45:52 INFO    flat_scout.observe | reading floorplans: 10/24 (41%), ~2m06s left
+07:46:22 INFO    flat_scout.observe | reading floorplans: 11/24 (45%), ~2m21s left
+07:46:28 INFO    flat_scout.vision | north measured 238 by position, but read as 45
+07:46:34 INFO    flat_scout.vision | north measured 30 by position, but read as 212
+07:46:35 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+07:46:52 INFO    flat_scout.observe | reading floorplans: 15/24 (62%), ~1m30s left
+07:47:11 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+07:47:22 INFO    flat_scout.observe | reading floorplans: 17/24 (70%), ~1m14s left
+07:47:32 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+07:47:52 INFO    flat_scout.observe | reading floorplans: 19/24 (79%), ~55s left
+07:48:22 INFO    flat_scout.observe | reading floorplans: 20/24 (83%), ~48s left
+07:48:52 INFO    flat_scout.observe | reading floorplans: 20/24 (83%), ~54s left
+07:49:22 INFO    flat_scout.observe | reading floorplans: 21/24 (87%), ~42s left
+07:49:46 INFO    flat_scout.vision | north measured 256 by letter-and-position, but read as 48
+07:49:52 INFO    flat_scout.observe | reading floorplans: 22/24 (91%), ~30s left
+07:50:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~15s left
+07:50:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~16s left

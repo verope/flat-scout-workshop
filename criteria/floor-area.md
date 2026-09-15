@@ -1,7 +1,7 @@
 ---
 name: At least 50 m²
 description: Fifty square metres is the floor, not the target. Below it there is nowhere for a table and a dog bed.
-weight: 4
+weight: 3
 grade:
   grader: floor_area
 unknown: skip

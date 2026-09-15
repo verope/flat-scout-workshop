@@ -1,0 +1,29 @@
+$ uv run flat-scout grade --measure --sample 5 --runs 3
+07:44:16 INFO    flat_scout.observe | measuring Criteria: 20 to do
+07:44:46 INFO    flat_scout.observe | measuring Criteria: 0/20 (0%), 30s elapsed
+07:45:16 INFO    flat_scout.observe | measuring Criteria: 2/20 (10%), ~9m00s left
+07:45:46 INFO    flat_scout.observe | measuring Criteria: 4/20 (20%), ~6m00s left
+07:46:16 INFO    flat_scout.observe | measuring Criteria: 6/20 (30%), ~4m40s left
+07:46:46 INFO    flat_scout.observe | measuring Criteria: 8/20 (40%), ~3m45s left
+07:47:16 INFO    flat_scout.observe | measuring Criteria: 10/20 (50%), ~3m00s left
+07:47:46 INFO    flat_scout.observe | measuring Criteria: 10/20 (50%), ~3m30s left
+07:48:16 INFO    flat_scout.observe | measuring Criteria: 11/20 (55%), ~3m16s left
+07:48:46 INFO    flat_scout.observe | measuring Criteria: 12/20 (60%), ~3m00s left
+07:49:16 INFO    flat_scout.observe | measuring Criteria: 13/20 (65%), ~2m41s left
+07:49:46 INFO    flat_scout.observe | measuring Criteria: 15/20 (75%), ~1m50s left
+07:50:16 INFO    flat_scout.observe | measuring Criteria: 17/20 (85%), ~1m03s left
+07:50:46 INFO    flat_scout.observe | measuring Criteria: 19/20 (95%), ~20s left
+07:50:52 INFO    flat_scout.observe | measuring Criteria: done, 20 in 6m36s
+5 Listings sampled, 3 runs each, over the Criteria that can reach a model.
+
+  An aspect other than west        unknown 100%   widest disagreement  0.0
+  Hard floors through the living areas unknown  80%   widest disagreement  0.0
+  A lift above the second floor    unknown  47%   widest disagreement  0.0
+  A tenancy that accepts a dog     unknown 100%   widest disagreement  0.0
+
+An aspect other than west, A tenancy that accepts a dog was unknown on nearly
+every Listing. Its weight is being redistributed to everything else, quietly.
+Either the rubric asks for something adverts never state, or it wants a
+deterministic field it is not reading.
+
+Aspect: the Criterion graded 0 of 17 annotated plans the same off the human's reading as off the pipeline's.

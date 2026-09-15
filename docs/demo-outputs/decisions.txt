@@ -1,0 +1,42 @@
+$ uv run flat-scout report --decisions
+Score against Decision, over 10 decisions.
+
+  approved   5   mean  7.0   range 3.6 - 8.2
+  rejected   5   mean  4.0   range 3.1 - 7.1
+
+  The approved mean sits 3.0 above the rejected mean.
+  Small sample: 5 approved, 5 rejected. Read the rows below, not the averages.
+
+Overlap
+  3.6 - 7.1, holding 1 approval and 2 rejections. No threshold can separate
+  those.
+
+Disagreements
+  Rejected, but scored high
+    #64  7.1  £3,125  UNCLE Elephant & Castle, 9 Churchyard Row, SE11  (hopeful Verdict)
+        The description states "Pet-friendly" outright, which under the rubric is an explicit pet-friendly policy.
+        52 m², from the listing.
+    #26  3.6  £2,000  Barnsbury Road, 
+Barnsbury, N1
+        Description states "Wooden Floors Throughout" — hard floors across the living areas.
+        The description states the flat is on the ground floor, which is second floor or below, so stairs/lift is irrelevant under the rubric.
+  Approved, but scored low
+    #82  3.6  £3,500  Triptych Place, Southbank, SE1
+        Windows face E, read off the plan's compass.
+
+Threshold arithmetic
+  5 of 10 decided Listings carry a hopeful Verdict and are surfaced whatever
+  the cut is. The sums below account for that.
+  No cutoff separates these decisions: hiding every Listing on score would
+  disagree with no more of them than any cut inside the data.
+  The score is ranking backwards, so the rubrics in criteria/ are what need
+  rewriting - no value of hopeful_threshold rescues this.
+  The configured 6.5 loses 1 of 5 approvals and spares 4 of 5 rejections.
+
+Per Criterion, mean grade by Decision:
+
+  At least 50 m²                   w4    approved  6.8   rejected  1.6   gap  +5.2
+  An aspect other than west        w2    approved 10.0   rejected  5.0   gap  +5.0
+  Hard floors through the living areas w1    approved 10.0   rejected 10.0   gap  +0.0
+  A lift above the second floor    w1    approved 10.0   rejected 10.0   gap  +0.0
+  A tenancy that accepts a dog     w3    approved 10.0   rejected 10.0   gap  +0.0

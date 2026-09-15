@@ -129,8 +129,14 @@ def test_check_prints_the_grade_vector_after_a_weighted_evaluation(tmp_path, mon
     result = runner.invoke(cli.app, ["check", "https://www.rightmove.co.uk/properties/1"])
 
     assert result.exit_code == 0, result.output
-    grades = result.output[result.output.index("Grades"):]
-    assert "A lift above the second floor" in grades
-    assert "10.0" in grades
-    assert "w2" in grades or "weight 2" in grades
-    assert "Third floor with a lift." in grades
+    import json
+
+    printed = json.loads(result.output)
+    assert printed["id"] == listing_id
+    [lift] = printed["grades"]
+    assert lift["criterion"] == "lift"
+    assert lift["name"] == "A lift above the second floor"
+    assert lift["weight"] == 2
+    assert lift["grade"] == 10.0
+    assert lift["determined"] is True
+    assert lift["evidence"] == "Third floor with a lift."

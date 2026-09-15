@@ -1,0 +1,51 @@
+$ uv run flat-scout report --weights
+Replayed over the stored grades. No model was called.
+Weights total 10; coverage floor 35%.
+
+Score on the new scale, over every graded Listing:
+
+   2.5  ####### 9
+   3.0  ############## 19
+   4.0  ###### 8
+   4.5  ############################## 41
+   5.0  ############ 16
+   5.5  ############ 17
+   6.0  ## 3
+  ----- threshold 6.5 ------------------------
+   7.0  ### 4
+   7.5  ## 3
+   8.0  # 1
+
+  8 of 121 clear the configured 6.5 and could be surfaced on it.
+  A veto, or coverage under the 35% floor, would gate a Listing at any cut.
+  Neither is counted above; no graded Listing over the cut carries either.
+
+Replayed against Decision
+
+  approved   5   mean  7.0   range 4.0 - 8.2
+  rejected   5   mean  4.2   range 3.4 - 7.0
+
+  The approved mean sits 2.8 above the rejected mean.
+  Small sample: 5 approved, 5 rejected. Read the rows below, not the averages.
+
+Overlap
+  4.0 - 7.0, holding 1 approval and 2 rejections. No threshold can separate
+  those under these weights.
+
+Threshold arithmetic
+  A cut at 7.6 loses 1 of 5 approvals and spares 5 of 5 rejections.
+  The configured 6.5 loses 1 of 5 approvals and spares 4 of 5 rejections.
+
+Misclassifications at the configured 6.5
+  Rejected, but replayed above the cut
+    #64   7.0   60% read  £3,125  UNCLE Elephant & Castle, 9 Churchyard Row, SE11
+  Approved, but replayed below the cut
+    #82   4.0   50% read  £3,500  Triptych Place, Southbank, SE1
+
+Per Criterion, mean grade by Decision:
+
+  At least 50 m²                   w3    approved  6.8   rejected  1.6   gap  +5.2
+  An aspect other than west        w2    approved 10.0   rejected  5.0   gap  +5.0
+  Hard floors through the living areas w1    approved 10.0   rejected 10.0   gap  +0.0
+  A lift above the second floor    w1    approved 10.0   rejected 10.0   gap  +0.0
+  A tenancy that accepts a dog     w3    approved 10.0   rejected 10.0   gap  +0.0

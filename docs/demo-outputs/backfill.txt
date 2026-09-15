@@ -1,0 +1,14 @@
+$ uv run flat-scout grade --backfill
+07:41:58 INFO    flat_scout.observe | grading Listings: 167 to do
+07:42:28 INFO    flat_scout.observe | grading Listings: 165/167 (98%), ~0s left
+07:42:58 INFO    flat_scout.observe | grading Listings: 166/167 (99%), ~0s left
+07:43:14 INFO    flat_scout.observe | grading Listings: done, 167 in 1m16s
+Graded 167 Listings. 12 model calls.
+
+Coverage:
+  0%-25%  ############################################################################### 79
+  25%-50%  #################################################### 52
+  50%-75%  ############################### 31
+  75%-100%  ##### 5
+
+164 were already graded against the current rubrics.

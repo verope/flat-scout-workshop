@@ -1,0 +1,117 @@
+# Demo runbook
+
+Two acts. The first shows the tool working; the second asks whether it is any
+good. Every command below runs from the repository root with a graded
+`data/` in place. Three listings were held back from the pre-grading so the
+live `check` is a real first evaluation: 83 (pet friendly, with floorplan
+and EPC, evaluated both ways), 8 (no pets) and 24 (spare, same shape as 83).
+
+If the network dies, every command's output from the rehearsal is in
+`docs/demo-outputs/`.
+
+Two things a sharp audience will ask about:
+
+- **`vision_model` says Claude Sonnet.** The image readings were made in
+  August by Sonnet, when the corpus was built, and every run since has
+  reused them rather than paid to redo them. The column records who read
+  the images, and that is the honest answer. The graders are GLM Flash.
+- **Why the cheap model returned unknown on everything, once.** The first
+  corpus run on GLM Flash graded pets unknown on 162 of 165 listings. The
+  model reasoned "Grade 10" and then left the `grade` field out of its tool
+  call, because the field had a default and the model omits everything it
+  is not required to send. Making the field required-but-nullable fixed it.
+  That is a whole evals lesson in one bug: the schema was the rubric, and
+  nobody had measured the unknown rate until `grade --measure` did.
+
+## Before the room fills
+
+```sh
+uv sync
+uv run flat-scout status          # expect: new 3, evaluated 164
+cat .env                          # OPENROUTER_API_KEY set, models as shipped
+```
+
+## Act one: the tool (about 10 minutes)
+
+1. **What is stored.**
+   ```sh
+   uv run flat-scout status
+   ```
+2. **The naive evaluator.** Pet friendly, with a floorplan and an EPC. The
+   whole brief goes to the model once and one score comes back. The vision
+   reading is already stored, so this is one text call. About half a minute.
+   ```sh
+   uv run flat-scout check --holistic https://www.rightmove.co.uk/properties/91601766
+   ```
+   Point at `score`, `verdict`, `reasons`, and `evaluation_mode: holistic`.
+   Note there is no `coverage`: one number, and nothing to say how much of
+   the brief it rests on.
+3. **The same flat, one Criterion at a time.** `--force` because the listing
+   now has a Verdict. About a minute.
+   ```sh
+   uv run flat-scout check --weighted --force https://www.rightmove.co.uk/properties/91601766
+   ```
+   Point at `score` beside the holistic one, `coverage`, `agent_questions`,
+   and `evaluation_mode: weighted`. The JSON now carries a `grades` list:
+   one entry per Criterion with its grade, its weight and what the grade
+   was read off. A `grade` of null is unknown, and unknown is a real answer.
+4. **A veto.** The advert says "Pets Not Allowed". The Criterion fires its
+   veto and the Verdict is reject whatever the Score. About a minute.
+   ```sh
+   uv run flat-scout check https://www.rightmove.co.uk/properties/92077104
+   ```
+   Point at `verdict`, `reasons`, and the `pets` grade.
+5. **The corpus.** The histogram with the threshold drawn in.
+   ```sh
+   uv run flat-scout report
+   ```
+
+## Act two: is it any good (about 20 minutes)
+
+6. **Coverage.** A re-run is free and prints the coverage distribution. The
+   point: a Score at 40% Coverage is a guess wearing a number's clothes.
+   ```sh
+   uv run flat-scout grade --backfill
+   ```
+7. **Judge noise.** Each model-graded Criterion asked three times over five
+   listings. Unknown rate and self-disagreement per Criterion. A few
+   minutes live; the saved output is in `docs/demo-outputs/measure.txt`.
+   ```sh
+   uv run flat-scout grade --measure --sample 5 --runs 3
+   ```
+8. **Score against Decision.** Ten decisions are already on record: five
+   approvals and five rejections, made on the pre-graded corpus. One
+   approved flat scored 3.6 and one rejected flat scored 7.1, so no
+   threshold separates them, and the report says so. No model call.
+   ```sh
+   uv run flat-scout report --decisions
+   ```
+   To make one live: `uv run flat-scout approve <id>` on something from the
+   histogram's top, then re-run the report.
+9. **Which Criterion does the work.** The same decisions replayed per
+   Criterion: mean grade among approved against rejected, and the gap. A
+   Criterion with no gap is not earning its weight. No model call.
+   ```sh
+   uv run flat-scout report --weights
+   ```
+10. **Edit a rubric, re-grade only that.** Change the weight or a band in
+   `criteria/lift.md`, then:
+   ```sh
+   uv run flat-scout grade --backfill        # only lift is stale
+   uv run flat-scout report --weights
+   ```
+   Revert the edit afterwards (`git checkout criteria/lift.md`).
+11. **Ground truth.** The floorplan reader against the human annotations,
+    stage by stage. Two vision calls per plan; no database needed.
+    ```sh
+    uv run flat-scout benchmark
+    ```
+
+If short of time, drop step 10 first, then step 8.
+
+## Attendees afterwards
+
+The graded `data/` is attached to the GitHub release as `data.zip`. Unzip it
+into the repository root, put an OpenRouter key in `.env`, and every command
+above works. `report` and `report --weights` cost nothing; `check` on a new
+URL costs well under a cent on the default model.

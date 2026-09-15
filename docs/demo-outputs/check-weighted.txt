@@ -1,0 +1,79 @@
+$ uv run flat-scout check --weighted --force https://www.rightmove.co.uk/properties/92098377
+{
+  "id": 24,
+  "portal": "rightmove",
+  "portal_id": "92098377",
+  "url": "https://www.rightmove.co.uk/properties/92098377",
+  "source": "alert",
+  "first_seen": "2026-08-17T21:25:09.860430+00:00",
+  "address": "The Lark, \nMoat Street, SW11",
+  "postcode": "SW11",
+  "price_pcm": 3065,
+  "beds": 1,
+  "sqft": 531,
+  "floor": null,
+  "furnished": "Unfurnished",
+  "pet_notes": null,
+  "description": "Fully furnished apartments; Private balconies (on selected units); Pet-friendly development.; Amenities: Gym, cinema room, co-working spaces, podium garden, parcel lockers, bike storage.; Location: Zone 1, 5 mins to Battersea Power Station &amp; Northern Line.; Close to Battersea Park, riverside walks, caf\u00e9s &amp; dining. *AVAILABLE TO WORKING PROFESSIONALS ONLY*Welcome to The Lark \u2013 Modern Living in Nine Elms.The Lark offers more than beautifully designed apartments - it delivers a lifestyle built around comfort, convenience, and community. Enjoy fully furnished homes, with balconies available on selected apartments, petfriendly living, and an impressive suite of amenities including a residents\u2019 gym, cinema room, coworking spaces, podium garden, and secure parcel lockers.Prime Zone 1 Location:Just five minutes from Battersea Power Station and the Northern Line, The Lark puts you within easy reach of the West End, City, and Westminster. Surrounded by green spaces like Battersea Park and riverside walks, plus vibrant caf\u00e9s and dining options, Nine Elms is a thriving neighbourhood where nature meets city life.Amenities Designed for You:- Stylish lobby & communal areas- Co-working space & meeting rooms- Cinema room- Fully equipped gym- Podium garden- Bike storage- On-site handyman- 24/7 Concierge- Secure parcel & storage lockersThe Lark isn\u2019t just a home \u2013 it\u2019s a sanctuary in the heart of London.Our China Desk is here for you, if Chinese is your preferred language, please get in touch via WeChat (ChestertonsLettings)",
+  "listed_on": "Added today",
+  "image_url": "https://media.rightmove.co.uk/property-photo/c0114c3a5/92098377/c0114c3a52e71cf34a043c67aec15899.jpeg",
+  "epc_caption": "EPC Rating Graph",
+  "epc_image_url": "https://media.rightmove.co.uk/property-epc/d7ecec999/92098377/d7ecec999947ecaf5a6bed6289619187.PNG",
+  "floorplan_url": "https://media.rightmove.co.uk/property-floorplan/ff639546d/92098377/ff639546d4a147292762f8649bc4c869.jpeg",
+  "image_path": "data/images/rightmove_92098377/photo.jpg",
+  "epc_image_path": "data/images/rightmove_92098377/epc.png",
+  "floorplan_path": "data/images/rightmove_92098377/floorplan.jpg",
+  "council_tax_band": null,
+  "nearest_station": "Battersea Power Underground Station",
+  "nearest_station_miles": 0.25,
+  "latitude": 51.48071,
+  "longitude": -0.136418,
+  "fetched_at": "2026-08-17T21:25:14.226003+00:00",
+  "fetch_status": "ok",
+  "fetch_attempts": 1,
+  "epc_band": "B",
+  "epc_band_source": "graph",
+  "epc_floor_area_sqm": null,
+  "epc_property_type": null,
+  "layout_verdict": "poor",
+  "layout_notes": "[\"Open-plan living/dining/kitchen space (26'5\\\" x 14'10\\\")\", \"Bedroom has separate door but no external window visible on plan\", \"No clear space for a desk in living area, mostly filled by sofa, table, kitchen units\"]",
+  "reception_is_separate": 0,
+  "desk_space": 0,
+  "bedroom_has_window": 0,
+  "floor_text": null,
+  "north_clock": null,
+  "windows_clock": null,
+  "window_aspects": null,
+  "north_source": null,
+  "images_read_at": "2026-08-17T21:25:19.714996+00:00",
+  "vision_model": "anthropic:claude-sonnet-5",
+  "verdict": "borderline",
+  "score": 4.181818181818182,
+  "coverage": 0.6363636363636364,
+  "reasons": "[\"Description states \\\"Pet-friendly development\\\" / \\\"petfriendly living\\\" with no cost or conditions attached.\"]",
+  "red_flags": "[\"The Portal's furnished field says Unfurnished while the advert's prose repeatedly claims \\\"Fully furnished apartments\\\" \\u2014 a direct contradiction someone will need to resolve before viewing.\", \"49 m\\u00b2, from the listing.\"]",
+  "agent_questions": "[\"Which way do the main living-room windows face?\", \"What is the flooring in the living room and the hallway?\", \"Could you tell us which floor this apartment is on, and whether the building has a lift?\", \"Can you confirm there is no pet deposit or rent uplift for a dog arriving in spring?\"]",
+  "evaluated_at": "2026-09-15T05:50:15.949569+00:00",
+  "model": "openrouter:z-ai/glm-5.3-flash",
+  "evaluation_mode": "weighted",
+  "status": "evaluated",
+  "decided_at": null,
+  "notes": null,
+  "score_low": null,
+  "score_high": null,
+  "p_hopeful": null,
+  "posterior_fit_hash": null
+}
+
+Grades
+     ?  w2  An aspect other than west
+             Neither window_aspects nor the advert prose states any compass aspect; the balcony on the plan is not a permitted source.
+   0.0  w4  At least 50 m²
+             49 m², from the listing.
+     ?  w1  Hard floors through the living areas
+             Neither the description nor the key features states any flooring material, so the living-area floors are unknown.
+     ?  w1  A lift above the second floor
+             Nothing in the listing states which floor this flat is on — the description never says "set on the Xth floor", there is no floor field or floorplan title block, and the long amenities list (gym, cinema, concierge, bike storage and so on) never mentions a lift either — so with the floor unknown the rubric requires null.
+  10.0  w3  A tenancy that accepts a dog
+             Description states "Pet-friendly development" / "petfriendly living" with no cost or conditions attached.
+uv run flat-scout check --weighted --force "$URL" 2>&1  1.79s user 0.36s system 1% cpu 2:41.74 total
