@@ -1,54 +1,104 @@
 $ uv run flat-scout benchmark
-07:44:22 INFO    flat_scout.observe | reading floorplans: 24 to do
-07:44:52 INFO    flat_scout.observe | reading floorplans: 0/24 (0%), 30s elapsed
-07:45:22 INFO    flat_scout.observe | reading floorplans: 4/24 (16%), ~5m00s left
-07:45:38 INFO    flat_scout.vision | north measured 216 by position, but read as 345
-07:45:44 INFO    flat_scout.vision | compass not confirmed by a second box: 202 then nothing
-07:45:46 INFO    flat_scout.vision | north measured 318 by position, but read as 225
-07:45:48 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
-07:45:50 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
-07:45:52 INFO    flat_scout.observe | reading floorplans: 10/24 (41%), ~2m06s left
-07:46:22 INFO    flat_scout.observe | reading floorplans: 11/24 (45%), ~2m21s left
-07:46:28 INFO    flat_scout.vision | north measured 238 by position, but read as 45
-07:46:34 INFO    flat_scout.vision | north measured 30 by position, but read as 212
-07:46:35 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
-07:46:52 INFO    flat_scout.observe | reading floorplans: 15/24 (62%), ~1m30s left
-07:47:11 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
-07:47:22 INFO    flat_scout.observe | reading floorplans: 17/24 (70%), ~1m14s left
-07:47:32 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
-07:47:52 INFO    flat_scout.observe | reading floorplans: 19/24 (79%), ~55s left
-07:48:22 INFO    flat_scout.observe | reading floorplans: 20/24 (83%), ~48s left
-07:48:52 INFO    flat_scout.observe | reading floorplans: 20/24 (83%), ~54s left
-07:49:22 INFO    flat_scout.observe | reading floorplans: 21/24 (87%), ~42s left
-07:49:46 INFO    flat_scout.vision | north measured 256 by letter-and-position, but read as 48
-07:49:52 INFO    flat_scout.observe | reading floorplans: 22/24 (91%), ~30s left
-07:50:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~15s left
-07:50:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~16s left
-07:51:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~18s left
-07:51:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~19s left
-07:52:22 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~20s left
-07:52:52 INFO    flat_scout.observe | reading floorplans: 23/24 (95%), ~22s left
-07:53:01 INFO    flat_scout.vision | compass not confirmed by a second box: 227 then 313
-07:53:01 INFO    flat_scout.observe | reading floorplans: done, 24 in 8m39s
+08:34:37 INFO    flat_scout.observe | reading floorplans: 21 to do
+08:35:07 INFO    flat_scout.observe | reading floorplans: 0/21 (0%), 30s elapsed
+08:35:37 INFO    flat_scout.observe | reading floorplans: 0/21 (0%), 1m00s elapsed
+08:36:07 INFO    flat_scout.observe | reading floorplans: 0/21 (0%), 1m30s elapsed
+08:36:37 INFO    flat_scout.observe | reading floorplans: 1/21 (4%), ~40m00s left
+08:36:50 INFO    flat_scout.vision | north measured 216 by position, but read as 338
+08:37:07 INFO    flat_scout.observe | reading floorplans: 4/21 (19%), ~10m37s left
+08:37:37 INFO    flat_scout.observe | reading floorplans: 4/21 (19%), ~12m45s left
+08:38:07 INFO    flat_scout.observe | reading floorplans: 6/21 (28%), ~8m45s left
+08:38:30 INFO    flat_scout.vision | north measured 258 by letter-and-position, but read as 45
+08:38:37 INFO    flat_scout.observe | reading floorplans: 9/21 (42%), ~5m20s left
+08:38:43 INFO    flat_scout.vision | compass not confirmed by a second box: 49 then 199
+08:38:45 INFO    flat_scout.vision | compass not confirmed by a second box: 270 then nothing
+08:38:46 INFO    flat_scout.vision | compass not confirmed by a second box: 159 then 82
+08:39:07 INFO    flat_scout.observe | reading floorplans: 12/21 (57%), ~3m22s left
+08:39:37 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+08:39:37 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~3m04s left
+08:40:07 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~3m23s left
+08:40:37 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~3m41s left
+08:41:07 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~4m00s left
+08:41:37 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~4m18s left
+08:42:07 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~4m36s left
+08:42:37 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~4m55s left
+08:42:42 INFO    openai._base_client | Retrying request to /chat/completions in 0.461467 seconds
+08:42:42 INFO    openai._base_client | Retrying request to /chat/completions in 0.462701 seconds
+08:42:42 INFO    openai._base_client | Retrying request to /chat/completions in 0.383197 seconds
+08:42:42 INFO    openai._base_client | Retrying request to /chat/completions in 0.438023 seconds
+08:42:43 INFO    openai._base_client | Retrying request to /chat/completions in 0.462510 seconds
+08:42:43 INFO    openai._base_client | Retrying request to /chat/completions in 0.445352 seconds
+08:42:43 INFO    openai._base_client | Retrying request to /chat/completions in 0.481602 seconds
+08:42:43 INFO    openai._base_client | Retrying request to /chat/completions in 0.393557 seconds
+08:43:07 INFO    flat_scout.observe | reading floorplans: 13/21 (61%), ~5m13s left
+08:43:24 INFO    flat_scout.vision | north measured 4 by position, but read as 270
+08:43:37 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~3m36s left
+08:44:07 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~3m48s left
+08:44:14 INFO    openai._base_client | Retrying request to /chat/completions in 0.470706 seconds
+08:44:38 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~4m00s left
+08:45:08 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~4m12s left
+08:45:38 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~4m24s left
+08:46:08 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~4m36s left
+08:46:38 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~4m48s left
+08:47:01 INFO    openai._base_client | Retrying request to /chat/completions in 0.981930 seconds
+08:47:01 INFO    openai._base_client | Retrying request to /chat/completions in 0.991641 seconds
+08:47:01 INFO    openai._base_client | Retrying request to /chat/completions in 0.873757 seconds
+08:47:01 INFO    openai._base_client | Retrying request to /chat/completions in 0.395419 seconds
+08:47:02 INFO    openai._base_client | Retrying request to /chat/completions in 0.881324 seconds
+08:47:08 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~5m00s left
+08:47:15 INFO    openai._base_client | Retrying request to /chat/completions in 0.762726 seconds
+08:47:38 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~5m12s left
+08:48:08 INFO    flat_scout.observe | reading floorplans: 15/21 (71%), ~5m24s left
+08:48:38 INFO    flat_scout.observe | reading floorplans: 16/21 (76%), ~4m22s left
+08:48:39 INFO    flat_scout.vision | north seen by arrow only, which is not accurate enough to store
+08:49:08 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m25s left
+08:49:38 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m30s left
+08:50:08 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m35s left
+08:50:38 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m40s left
+08:51:08 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m45s left
+08:51:38 INFO    flat_scout.observe | reading floorplans: 18/21 (85%), ~2m50s left
+08:52:01 INFO    flat_scout.vision | north measured 30 by position, but read as 210
+08:52:08 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~1m50s left
+08:52:38 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~1m53s left
+08:53:08 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~1m56s left
+08:53:38 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m00s left
+08:54:08 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m03s left
+08:54:38 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m06s left
+08:55:08 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m09s left
+08:55:38 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m12s left
+08:56:08 INFO    flat_scout.observe | reading floorplans: 19/21 (90%), ~2m15s left
+08:56:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m06s left
+08:57:08 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m07s left
+08:57:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m09s left
+08:58:08 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m10s left
+08:58:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m12s left
+08:59:08 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m13s left
+08:59:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m15s left
+09:00:08 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m16s left
+09:00:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m18s left
+09:01:08 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m19s left
+09:01:38 INFO    flat_scout.observe | reading floorplans: 20/21 (95%), ~1m21s left
+09:01:49 INFO    flat_scout.vision | compass not confirmed by a second box: 180 then nothing
+09:01:49 INFO    flat_scout.observe | reading floorplans: done, 21 in 27m11s
 Scored against the annotations, not against a second run.
 
-  north          14/18 right   4 wrong   0 abstained   6 correctly silent
-  window walls   22/24 right   2 wrong   0 abstained   0 correctly silent
-  aspects         6/17 right   5 wrong   6 abstained   7 correctly silent
+  north          11/16 right   4 wrong   1 abstained   5 correctly silent
+  window walls   16/21 right   5 wrong   0 abstained   0 correctly silent
+  aspects         8/15 right   2 wrong   5 abstained   6 correctly silent
 
-  6 of 17 plans got at least one aspect right, against the stricter count above, which requires every aspect named to be real.
+  8 of 15 plans got at least one aspect right, against the stricter count above, which requires every aspect named to be real.
 
-  22 of 41 real glazed walls were found across the corpus.
+  16 of 34 real glazed walls were found across the corpus.
 
 Where it went wrong
-    160824506  north        said 318        truth 230            via position
-    92082768  north        said 270        truth none           via -
+    92067954  north        said 4          truth 271            via position
+    92073510  north        said 180        truth none           via -
     92094612  north        said 30         truth 211            via position
-    92098377  north        said 256        truth 51             via letter-and-position
+    92098377  north        said 258        truth 51             via letter-and-position
+    92067690  window walls said 263        truth 346            via -
+    92067954  window walls said 270        truth 179            via position
+    92082768  window walls said 90         truth 270            via -
     92094612  window walls said 0          truth 271/91         via position
-    92096835  window walls said 90         truth 270            via position
-    160824506  aspects      said NW         truth NE/SE          via position
-    91941729  aspects      said SE         truth E              via position (upright N)
+    92098377  window walls said 180        truth 274            via letter-and-position
     92094612  aspects      said NW         truth NE/SW          via position
-    92096835  aspects      said SW         truth NE             via position
-    92098377  aspects      said N          truth SW             via letter-and-position
+    92098377  aspects      said W          truth SW             via letter-and-position
