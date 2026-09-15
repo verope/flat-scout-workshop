@@ -98,7 +98,7 @@ stopped and why. `approve` and `reject` record your own yes or no on a listing.
 | `criteria/_brief.md`, `criteria/_fields.md` | The preamble sent with every model-graded Criterion: who the tenants are, and what the extracted fields mean |
 | `criteria/criteria.md` | The same brief as one document. Read only by the naive baseline (`weighted_criteria = false` in `config.toml`), which sends it to the model once and gets back one score |
 | `criteria/retired/` | Criteria that no longer count. The loader reads `criteria/*.md` and does not recurse, so moving a file here retires it without losing its rubric or its stored grades |
-| `config.toml` | Hard filters, the score threshold, the coverage floor, the models, the feature flags |
+| `config.toml` | Hard filters, the score threshold, the coverage floor, the feature flags. The models are in `.env` |
 | `tests/fixtures/floorplans/` | The floorplan corpus and `annotations.toml`, the human answers `benchmark` scores against |
 | `docs/architecture.html` | How the pieces fit together, with diagrams. Open it in a browser |
 
