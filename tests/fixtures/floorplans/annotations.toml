@@ -10,8 +10,8 @@
 
 # The three plans below were annotated, and their answers are commented out
 # so they can be annotated live at the workshop without a preconception on
-# screen. The blank stubs after them are what the annotator shows. To
-# restore the answers, delete the stubs and uncomment these.
+# screen. The blank stubs after them are what the annotator shows. Saving
+# from the annotator drops these comments; the answers are in git at 472096b.
 # [plan.160824506]
 # file = "160824506.png"
 # address = ""

@@ -120,8 +120,12 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
     Point at a `# north_clock` line commented out: no indicator drawn is a
     real answer, and the benchmark scores "correctly silent" against it. The
     stubs are left blank on purpose, so nobody is asked to agree with the
-    answer under test. After the workshop, `git checkout` the TOML to drop
-    the live answers, or keep them and delete the commented originals. `--no-serve` writes a static sheet to
+    answer under test. Saving from the page rewrites the whole file and
+    drops every comment, including the three original answers, so restore
+    them from git afterwards rather than from the file:
+    ```sh
+    git checkout 472096b -- tests/fixtures/floorplans/annotations.toml
+    ``` `--no-serve` writes a static sheet to
     `output/annotation-sheet.html` if the port is a problem; `--db data/flats.db`
     would add the corpus's own floorplans, which is how the set grows.
 12. **The reader against that truth.** Stage by stage: north, window walls,
