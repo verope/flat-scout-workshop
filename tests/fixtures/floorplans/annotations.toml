@@ -8,32 +8,60 @@
 # compass_style  arrow | circle | rose | none
 # done           set to true when you have finished this plan.
 
+# The three plans below were annotated, and their answers are commented out
+# so they can be annotated live at the workshop without a preconception on
+# screen. The blank stubs after them are what the annotator shows. To
+# restore the answers, delete the stubs and uncomment these.
+# [plan.160824506]
+# file = "160824506.png"
+# address = ""
+# north_clock = 230
+# windows_clock = [357, 270]
+# compass_style = "rose"
+# notes = ""
+# done = true
+#
+# [plan.161883434]
+# file = "161883434.jpg"
+# address = ""
+# # north_clock = 0
+# windows_clock = [357, 207, 181]
+# compass_style = "none"
+# notes = ""
+# done = true
+#
+# [plan.87174279]
+# file = "87174279.png"
+# address = ""
+# north_clock = 297
+# windows_clock = [358, 282]
+# compass_style = "rose"
+# notes = ""
+# done = true
+#
 [plan.160824506]
 file = "160824506.png"
 address = ""
-north_clock = 230
-windows_clock = [357, 270]
-compass_style = "rose"
+windows_clock = []
+compass_style = ""
 notes = ""
-done = true
+done = false
 
 [plan.161883434]
 file = "161883434.jpg"
 address = ""
-# north_clock = 0
-windows_clock = [357, 207, 181]
-compass_style = "none"
+windows_clock = []
+compass_style = ""
 notes = ""
-done = true
+done = false
 
 [plan.87174279]
 file = "87174279.png"
 address = ""
-north_clock = 297
-windows_clock = [358, 282]
-compass_style = "rose"
+windows_clock = []
+compass_style = ""
 notes = ""
-done = true
+done = false
 
 [plan.88643514]
 file = "88643514.jpg"

@@ -53,10 +53,11 @@ def test_advert_silence_has_explicit_priors_only_where_it_speaks():
     assert priors == {"pets": {0.0: 0.7, 10.0: 0.3}}
 
 
-def test_the_total_weight_is_eleven():
-    """11 over the five active Criteria. Every Score moves when this moves, so
-    the number is asserted rather than left to drift unnoticed."""
-    assert sum(criterion.weight for criterion in shipped()) == 11
+def test_the_total_weight_is_ten():
+    """10 over the five active Criteria, since floor area came down from 4 to
+    3 for the workshop. Every Score moves when this moves, so the number is
+    asserted rather than left to drift unnoticed."""
+    assert sum(criterion.weight for criterion in shipped()) == 10
 
 
 def test_only_the_aspect_criterion_falls_back_to_the_model():

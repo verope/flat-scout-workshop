@@ -107,17 +107,21 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
     whether a grade is *right*, only whether it is consistent and whether it
     separates the decisions. For the floorplan reader there is a human
     answer, and this is where it was written. Opens a page on port 8765 over
-    the 24 plans in `tests/fixtures/floorplans/`; click through one plan and
-    show the bearings being written down: where the north arrow points,
-    which walls the living-room windows are on, on the image, 0 up the page.
+    the 24 plans in `tests/fixtures/floorplans/`. The first three are blank
+    on purpose: their answers are commented out in the TOML so they can be
+    annotated live with no preconception on screen. Annotate one or two of
+    them in front of the room: where the north arrow points, which walls the
+    living-room windows are on, bearings on the image with 0 up the page,
+    then tick done. Answers save as they are made.
     ```sh
     uv run flat-scout annotate
     ```
     Then the file it writes, `tests/fixtures/floorplans/annotations.toml`.
     Point at a `# north_clock` line commented out: no indicator drawn is a
     real answer, and the benchmark scores "correctly silent" against it. The
-    stubs for new plans are left blank on purpose, so nobody is asked to
-    agree with the answer under test. `--no-serve` writes a static sheet to
+    stubs are left blank on purpose, so nobody is asked to agree with the
+    answer under test. After the workshop, `git checkout` the TOML to drop
+    the live answers, or keep them and delete the commented originals. `--no-serve` writes a static sheet to
     `output/annotation-sheet.html` if the port is a problem; `--db data/flats.db`
     would add the corpus's own floorplans, which is how the set grows.
 12. **The reader against that truth.** Stage by stage: north, window walls,
@@ -126,8 +130,9 @@ cat .env                          # OPENROUTER_API_KEY set, models as shipped
     ```sh
     uv run flat-scout benchmark
     ```
-    On the rehearsal: north right on 14 of 18, window walls on 22 of 24,
-    aspects on 6 of 17 with 6 abstentions. The "where it went wrong" rows
+    Run it after the live annotation and the plans just annotated are in
+    the score. Rehearsal figures over the 21 pre-annotated plans are in
+    `docs/demo-outputs/benchmark.txt`. The "where it went wrong" rows
     name the plan, the answer, the truth and the method, so a wrong answer
     is a plan you can open in the annotator and look at.
 
